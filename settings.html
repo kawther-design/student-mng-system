@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Configuration | Al Huda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        school: {
+                            blue: '#2D3E8B',
+                            teal: '#1DBF92',
+                            coral: '#FF6B52',
+                            bg: '#F8FAFF'
+                        }
+                    },
+                    fontFamily: { outfit: ['Outfit', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #F8FAFF; min-height: 100vh; }
+        .sidebar-item { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-item.active { 
+            background: linear-gradient(135deg, #2D3E8B 0%, #1a255a 100%);
+            color: white; 
+            box-shadow: 0 15px 30px -10px rgba(45, 62, 139, 0.4); 
+        }
+        .mesh-gradient {
+            background-color: #F8FAFF;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(228, 51%, 36%, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(164, 74%, 43%, 0.1) 0px, transparent 50%);
+        }
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 30px 60px -12px rgba(45, 62, 139, 0.08);
+        }
+        .input-premium {
+            background: rgba(243, 244, 246, 0.5);
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .input-premium:focus {
+            background: white;
+            border-color: #2D3E8B;
+            box-shadow: 0 10px 20px -10px rgba(45, 62, 139, 0.1);
+        }
+    </style>
+</head>
+<body class="text-gray-800 flex mesh-gradient">
+
+    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-blue/5">
+        <div class="flex items-center space-x-4 mb-16">
+            <div class="w-12 h-12 bg-school-blue rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-blue/20">
+                <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-black text-school-blue tracking-tighter uppercase">Al Huda</h1>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">Management v2.0</p>
+            </div>
+        </div>
+        
+        <nav class="flex-1 space-y-3">
+            <a href="admin-dashboard.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+                <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                <span class="font-bold text-sm">Dashboard</span>
+            </a>
+            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <span class="font-bold text-sm">Students</span>
+            </a>
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
+                <span class="font-bold text-sm">Users</span>
+            </a>
+            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+                <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                <span class="font-bold text-sm">Attendance</span>
+            </a>
+        </nav>
+
+        <div class="pt-8 border-t border-gray-100">
+            <a href="settings.html" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem] mb-4">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+                <span class="font-black text-sm uppercase tracking-widest">Settings</span>
+            </a>
+            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-coral hover:bg-school-coral/5 transition-all group">
+                <i data-lucide="log-out" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
+                <span class="font-black text-sm uppercase tracking-widest">Sign Out</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 lg:ml-72 w-full p-10">
+        <header class="flex justify-between items-center mb-16">
+            <div>
+                <h2 class="text-3xl font-black text-school-blue tracking-tighter uppercase leading-none">System Configuration</h2>
+                <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] mt-3">Personalize your academic workspace</p>
+            </div>
+            <button class="px-12 py-5 bg-school-coral text-white rounded-[2rem] font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-school-coral/20 hover:scale-105 active:scale-95 transition-all">
+                Propagate Changes
+            </button>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+            <div class="lg:col-span-1 space-y-4">
+                <button class="w-full text-left p-6 rounded-[2rem] bg-school-blue text-white shadow-2xl shadow-school-blue/20 font-black text-[10px] uppercase tracking-widest flex items-center justify-between group">
+                    <span>Profile Profile</span>
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                </button>
+                <button class="w-full text-left p-6 rounded-[2rem] bg-white border border-gray-100 text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all font-black text-[10px] uppercase tracking-widest flex items-center justify-between group">
+                    <span>Security Vault</span>
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </button>
+                <button class="w-full text-left p-6 rounded-[2rem] bg-white border border-gray-100 text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all font-black text-[10px] uppercase tracking-widest flex items-center justify-between group">
+                    <span>Communications</span>
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="lg:col-span-3 space-y-10">
+                <div class="glass-card rounded-[4rem] p-12 lg:p-16">
+                    <div class="flex items-center space-x-10 mb-16">
+                        <div class="relative group">
+                            <div class="w-32 h-32 rounded-[3rem] bg-school-blue flex items-center justify-center p-1 border-4 border-white shadow-2xl overflow-hidden transition-transform group-hover:scale-105 duration-500">
+                                <img src="https://ui-avatars.com/api/?name=Admin+User&background=2D3E8B&color=fff" class="w-full h-full rounded-[2.8rem] object-cover">
+                            </div>
+                            <button class="absolute -bottom-2 -right-2 w-12 h-12 bg-school-teal text-white rounded-2xl flex items-center justify-center shadow-xl border-4 border-white hover:scale-110 transition-all">
+                                <i data-lucide="camera" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <div>
+                            <h4 class="text-4xl font-black text-school-blue tracking-tighter uppercase leading-none">Abdirahman Ali</h4>
+                            <div class="flex items-center mt-4 space-x-4">
+                                <span class="px-5 py-2 bg-school-teal/10 text-school-teal text-[9px] font-black uppercase rounded-full tracking-widest">Main Administrator</span>
+                                <div class="w-2 h-2 rounded-full bg-gray-200"></div>
+                                <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest">Academic Board Member</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="space-y-3">
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Full Legal Identity</label>
+                            <input type="text" value="Abdirahman Ali" class="w-full input-premium rounded-[1.5rem] py-5 px-8 text-sm font-bold text-school-blue outline-none">
+                        </div>
+                        <div class="space-y-3">
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Administrative Email</label>
+                            <input type="email" value="admin@alhuda.so" class="w-full input-premium rounded-[1.5rem] py-5 px-8 text-sm font-bold text-school-blue outline-none">
+                        </div>
+                        <div class="space-y-3">
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Direct Contact Line</label>
+                            <input type="text" value="+252 61 234 5678" class="w-full input-premium rounded-[1.5rem] py-5 px-8 text-sm font-bold text-school-blue outline-none">
+                        </div>
+                        <div class="space-y-3">
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Office Designation</label>
+                            <input type="text" value="Building A, Room 302" class="w-full input-premium rounded-[1.5rem] py-5 px-8 text-sm font-bold text-school-blue outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-[4rem] p-10 bg-school-coral/[0.03] border-school-coral/10">
+                    <div class="flex items-start space-x-8">
+                        <div class="w-16 h-16 bg-school-coral text-white rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-school-coral/30 flex-shrink-0">
+                            <i data-lucide="shield-alert" class="w-8 h-8"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-black text-school-blue tracking-tighter uppercase">Identity Protection Warning</h3>
+                            <p class="text-[12px] text-gray-500 font-medium leading-relaxed mt-3">Two-factor authentication is currently disabled. We highly recommend enabling it to secure your administrative portal from unauthorized access.</p>
+                            <button class="mt-8 px-10 py-4 bg-white text-school-coral border-2 border-school-coral/10 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest hover:bg-school-coral hover:text-white transition-all shadow-xl shadow-school-coral/5">Activate 2FA Guard</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>
