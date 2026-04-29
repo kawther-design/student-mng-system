@@ -28,6 +28,7 @@
         }
     </script>
     <style>
+        html { scroll-behavior: smooth; }
         body {
             font-family: 'Outfit', sans-serif;
             background-color: #F8FAFF;
@@ -139,9 +140,9 @@
         </div>
 
         <nav class="hidden md:flex items-center space-x-10">
-            <a href="#" class="nav-link active">HOME</a>
-            <a href="#" class="nav-link">ACADEMICS</a>
-            <a href="#" class="nav-link">ADMISSIONS</a>
+            <a href="#home" class="nav-link active">HOME</a>
+            <a href="#academics" class="nav-link">ACADEMICS</a>
+            <a href="#admissions" class="nav-link">ADMISSIONS</a>
             <a href="#contact" class="nav-link">CONTACT US</a>
         </nav>
 
@@ -152,7 +153,7 @@
     </header>
 
     <!-- Hero Section -->
-    <section
+    <section id="home"
         class="container mx-auto px-6 pt-12 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
         <div class="max-w-xl">
             <p class="text-school-blue font-black text-sm mb-4 tracking-wide">Your future begins here</p>
@@ -202,7 +203,7 @@
     </section>
 
     <!-- Programs Section -->
-    <section class="py-20 relative">
+    <section id="academics" class="py-20 relative">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2
@@ -252,7 +253,7 @@
     </section>
 
     <!-- Admissions / Contact Section -->
-    <section id="contact" class="py-24 relative overflow-hidden">
+    <section id="admissions" class="py-24 relative overflow-hidden">
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
@@ -289,7 +290,7 @@
                 </div>
 
                 <!-- Right Side (Form) -->
-                <div>
+                <div id="contact">
                     <div class="contact-card relative z-10">
                         <h3 class="text-2xl font-black text-school-blue tracking-tighter uppercase mb-8">CONTACT US</h3>
                         <form class="space-y-5">
