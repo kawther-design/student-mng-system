@@ -1,0 +1,26 @@
+# Dependency directories
+vendor/
+
+# Database configuration and sensitive files
+db_config.php
+
+# Environment variables
+.env
+.env.local
+
+# Composer execution file
+composer.phar
+
+# Log files
+*.log
+error_log
+php_errors.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
