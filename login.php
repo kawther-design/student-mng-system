@@ -20,8 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['role'] = $user->role;
         $_SESSION['name'] = $user->name;
         
-        if ($user->role === 'Admin' || $user->role === 'Vice President') {
+        if ($user->role === 'Admin') {
             header('Location: admin-dashboard.php');
+        } elseif ($user->role === 'Vice President') {
+            header('Location: vice-president-dashboard.php');
         } elseif ($user->role === 'Teacher') {
             header('Location: teacher-dashboard.php');
         } elseif ($user->role === 'Parent') {
@@ -142,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <form method="POST" class="space-y-7">
+        <form method="POST" class="space-y-7" autocomplete="off">
             <div class="space-y-2">
                 <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase tracking-widest ml-3">System Role</label>
                 <div class="input-box relative rounded-[2rem] bg-gray-50/50 transition-all border border-transparent flex items-center">
@@ -167,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300">
                         <i data-lucide="user" class="w-5 h-5"></i>
                     </div>
-                    <input type="text" name="email" required placeholder="Username or Email" class="w-full bg-transparent border-none rounded-[2rem] py-5 pl-16 pr-8 outline-none font-bold text-school-blue text-sm placeholder:text-gray-300">
+                    <input type="text" name="email" required placeholder="Username or Email" autocomplete="off" class="w-full bg-transparent border-none rounded-[2rem] py-5 pl-16 pr-8 outline-none font-bold text-school-blue text-sm placeholder:text-gray-300">
                 </div>
             </div>
 
@@ -177,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300">
                         <i data-lucide="lock" class="w-5 h-5"></i>
                     </div>
-                    <input type="password" name="password" required placeholder="••••••••" class="w-full bg-transparent border-none rounded-[2rem] py-5 pl-16 pr-8 outline-none font-bold text-school-blue text-sm placeholder:text-gray-300">
+                    <input type="password" name="password" required placeholder="••••••••" autocomplete="new-password" class="w-full bg-transparent border-none rounded-[2rem] py-5 pl-16 pr-8 outline-none font-bold text-school-blue text-sm placeholder:text-gray-300">
                 </div>
             </div>
 

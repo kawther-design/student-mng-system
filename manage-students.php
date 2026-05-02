@@ -29,6 +29,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// Handle Edit Student
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit_student') {
+    $collection = $database->getCollection('students');
+    $studentId = new MongoDB\BSON\ObjectId($_POST['_id']);
+    
+    $updateData = [
+        'name' => $_POST['name'],
+        'student_phone' => $_POST['student_phone'],
+        'gender' => $_POST['gender'],
+        'form' => $_POST['form'],
+        'neighborhood' => $_POST['neighborhood'],
+        'parent_name' => $_POST['parent_name'],
+        'parent_phone' => $_POST['parent_phone']
+    ];
+    
+    $collection->updateOne(['_id' => $studentId], ['$set' => $updateData]);
+    header('Location: manage-students.php?msg=Student Updated');
+    exit;
+}
+
 // Handle Delete Student
 if (isset($_GET['delete_id'])) {
     $collection = $database->getCollection('students');
@@ -41,14 +61,31 @@ if (isset($_GET['delete_id'])) {
 $collection = $database->getCollection('students');
 $students = $collection->find([], ['sort' => ['name' => 1]])->toArray();
 
-// Generate next Student ID
+// Generate next Student ID (4-digit format)
 $lastStudent = $collection->findOne(['student_id' => ['$exists' => true]], ['sort' => ['student_id' => -1]]);
-$nextStudentId = '2026001';
+$nextStudentId = '1001';
 if ($lastStudent && isset($lastStudent->student_id)) {
     $lastId = (int)$lastStudent->student_id;
-    if ($lastId > 0) {
+    // Ensure we are working with the 4-digit logic even if old 7-digit IDs exist
+    if ($lastId >= 2026001) {
+        $nextStudentId = '1001'; // Reset or handle as needed, but for new 4-digit:
+    } else if ($lastId >= 1000) {
         $nextStudentId = (string)($lastId + 1);
     }
+}
+
+// Determine Dashboard URL and Accent Color based on role
+$dashboardUrl = 'admin-dashboard.php';
+$accentColor = '#2D3E8B'; // Default Blue for Admin
+if ($_SESSION['role'] === 'Teacher') {
+    $dashboardUrl = 'teacher-dashboard.php';
+    $accentColor = '#8B5CF6'; // Purple for Teacher
+} elseif ($_SESSION['role'] === 'Parent') {
+    $dashboardUrl = 'parent-dashboard.php';
+    $accentColor = '#F97316'; // Orange for Parent
+} elseif ($_SESSION['role'] === 'Vice President') {
+    $dashboardUrl = 'vice-president-dashboard.php';
+    $accentColor = '#1DBF92'; // Teal for VP
 }
 ?>
 <!DOCTYPE html>
@@ -66,9 +103,11 @@ if ($lastStudent && isset($lastStudent->student_id)) {
                 extend: {
                     colors: {
                         school: {
+                            accent: '<?= $accentColor ?>',
                             blue: '#2D3E8B',
                             teal: '#1DBF92',
                             coral: '#FF6B52',
+                            purple: '#8B5CF6',
                             bg: '#F8FAFF'
                         }
                     },
@@ -81,9 +120,9 @@ if ($lastStudent && isset($lastStudent->student_id)) {
         body { font-family: 'Outfit', sans-serif; background-color: #F8FAFF; }
         .sidebar-item { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .sidebar-item.active { 
-            background: linear-gradient(135deg, #2D3E8B 0%, #1a255a 100%);
+            background: linear-gradient(135deg, <?= $accentColor ?> 0%, #1a255a 100%);
             color: white; 
-            box-shadow: 0 15px 30px -10px rgba(45, 62, 139, 0.4); 
+            box-shadow: 0 15px 30px -10px <?= $accentColor ?>66; 
         }
         .student-card { 
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -105,7 +144,7 @@ if ($lastStudent && isset($lastStudent->student_id)) {
     <div id="studentModal" class="modal-hidden fixed inset-0 z-50 flex items-center justify-center p-6 bg-school-blue/20 backdrop-blur-md transition-modal">
         <div class="bg-white w-full max-w-2xl rounded-[4rem] p-12 lg:p-16 shadow-2xl relative">
             <button onclick="toggleModal()" class="absolute top-10 right-10 text-gray-400 hover:text-school-coral transition-all"><i data-lucide="x" class="w-8 h-8"></i></button>
-            <h3 class="text-3xl font-black text-school-blue mb-2 tracking-tighter uppercase">Student Registration</h3>
+            <h3 class="text-3xl font-black text-school-accent mb-2 tracking-tighter uppercase">Student Registration</h3>
             <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mb-12">Enroll a new student into the academic system</p>
             
             <form method="POST" class="space-y-8">
@@ -119,25 +158,25 @@ if ($lastStudent && isset($lastStudent->student_id)) {
                 <div class="grid grid-cols-2 gap-8">
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Full Student Name</label>
-                        <input type="text" name="name" required placeholder="Enter full name" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-blue focus:ring-2 focus:ring-school-blue/5">
+                        <input type="text" name="name" required placeholder="Enter full name" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Student Phone Number</label>
-                        <input type="text" name="student_phone" required placeholder="e.g. 061XXXXXXX" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-blue focus:ring-2 focus:ring-school-blue/5">
+                        <input type="text" name="student_phone" required placeholder="e.g. 061XXXXXXX" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-3 gap-8">
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Gender</label>
-                        <select name="gender" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-blue cursor-pointer">
+                        <select name="gender" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
                             <option>Male</option>
                             <option>Female</option>
                         </select>
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Academic Level</label>
-                        <select name="form" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-blue cursor-pointer">
+                        <select name="form" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
                             <option>Form 1</option>
                             <option>Form 2</option>
                             <option>Form 3</option>
@@ -146,7 +185,7 @@ if ($lastStudent && isset($lastStudent->student_id)) {
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Resident Area</label>
-                        <select name="neighborhood" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-blue cursor-pointer">
+                        <select name="neighborhood" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
                             <option>Sh Osman</option>
                             <option>Sh Ali</option>
                             <option>Sh Makahiil</option>
@@ -158,55 +197,127 @@ if ($lastStudent && isset($lastStudent->student_id)) {
                 <div class="grid grid-cols-2 gap-8">
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Parent Name</label>
-                        <input type="text" name="parent_name" required placeholder="Enter parent name" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-blue focus:ring-2 focus:ring-school-blue/5">
+                        <input type="text" name="parent_name" required placeholder="Enter parent name" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Parent Phone</label>
-                        <input type="text" name="parent_phone" required placeholder="e.g. 061XXXXXXX" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-blue focus:ring-2 focus:ring-school-blue/5">
+                        <input type="text" name="parent_phone" required placeholder="e.g. 061XXXXXXX" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
                     </div>
                 </div>
 
-                <button type="submit" class="w-full py-6 bg-school-blue text-white rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-school-blue/20 hover:scale-[1.02] active:scale-98 transition-all">Complete Enrollment</button>
+                <button type="submit" class="w-full py-6 bg-school-accent text-white rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-school-accent/20 hover:scale-[1.02] active:scale-98 transition-all">Complete Enrollment</button>
             </form>
         </div>
     </div>
 
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-blue/5">
+    <!-- Edit Student Modal -->
+    <div id="editStudentModal" class="modal-hidden fixed inset-0 z-50 flex items-center justify-center p-6 bg-school-accent/20 backdrop-blur-md transition-modal">
+        <div class="bg-white w-full max-w-2xl rounded-[4rem] p-12 lg:p-16 shadow-2xl relative">
+            <button onclick="toggleEditModal()" class="absolute top-10 right-10 text-gray-400 hover:text-school-coral transition-all"><i data-lucide="x" class="w-8 h-8"></i></button>
+            <h3 class="text-3xl font-black text-school-accent mb-2 tracking-tighter uppercase">Modify Student Record</h3>
+            <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mb-12">Update academic and contact information</p>
+            
+            <form method="POST" class="space-y-8">
+                <input type="hidden" name="action" value="edit_student">
+                <input type="hidden" name="_id" id="edit-id">
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Full Student Name</label>
+                        <input type="text" name="name" id="edit-name" required class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Student Phone Number</label>
+                        <input type="text" name="student_phone" id="edit-student-phone" required class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-8">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Gender</label>
+                        <select name="gender" id="edit-gender" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
+                            <option>Male</option>
+                            <option>Female</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Academic Level</label>
+                        <select name="form" id="edit-form" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
+                            <option>Form 1</option>
+                            <option>Form 2</option>
+                            <option>Form 3</option>
+                            <option>Form 4</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Resident Area</label>
+                        <select name="neighborhood" id="edit-neighborhood" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
+                            <option>Sh Osman</option>
+                            <option>Sh Ali</option>
+                            <option>Sh Makahiil</option>
+                            <option>Sh Ahmed Salaan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Parent Name</label>
+                        <input type="text" name="parent_name" id="edit-parent-name" required class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Parent Phone</label>
+                        <input type="text" name="parent_phone" id="edit-parent-phone" required class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-6 bg-school-accent text-white rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-school-accent/20 hover:scale-[1.02] active:scale-98 transition-all">Update Student Data</button>
+            </form>
+        </div>
+    </div>
+
+    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-accent/5">
         <div class="flex items-center space-x-4 mb-16">
-            <div class="w-12 h-12 bg-school-blue rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-blue/20">
+            <div class="w-12 h-12 bg-school-accent rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-accent/20">
                 <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-black text-school-blue tracking-tighter">AL HUDA</h1>
+                <h1 class="text-2xl font-black text-school-accent tracking-tighter">AL HUDA</h1>
                 <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">Management v2.0</p>
             </div>
         </div>
         
         <nav class="flex-1 space-y-3">
-            <a href="admin-dashboard.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
             <a href="manage-students.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
-                <i data-lucide="users" class="w-5 h-5"></i>
-                <span class="font-black text-sm uppercase tracking-widest">Students</span>
+                <i data-lucide="<?= $_SESSION['role'] === 'Vice President' ? 'user-plus' : 'users' ?>" class="w-5 h-5"></i>
+                <span class="font-black text-sm uppercase tracking-widest"><?= $_SESSION['role'] === 'Vice President' ? 'Student Registration' : 'Students' ?></span>
             </a>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
-                <i data-lucide="shield-check" class="w-5 h-5"></i>
-                <span class="font-bold text-sm">Users</span>
+            <?php if ($_SESSION['role'] !== 'Teacher'): ?>
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+                <i data-lucide="<?= $_SESSION['role'] === 'Vice President' ? 'users' : 'shield-check' ?>" class="w-5 h-5"></i>
+                <span class="font-bold text-sm"><?= $_SESSION['role'] === 'Vice President' ? 'Teachers Registration' : 'Users' ?></span>
             </a>
-            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+            <?php endif; ?>
+            <?php if ($_SESSION['role'] !== 'Vice President'): ?>
+            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="calendar-check" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Attendance</span>
             </a>
-            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+            <?php endif; ?>
+            <?php if ($_SESSION['role'] !== 'Teacher'): ?>
+            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
-                <span class="font-bold text-sm">Exam & Results</span>
+                <span class="font-bold text-sm"><?= $_SESSION['role'] === 'Vice President' ? 'Exam & Result' : 'Exam & Results' ?></span>
             </a>
+            <?php endif; ?>
         </nav>
 
         <div class="pt-8 border-t border-gray-100">
-            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-coral hover:bg-school-coral/5 transition-all group">
+            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-red-500 hover:bg-red-50 transition-all group">
                 <i data-lucide="log-out" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Sign Out</span>
             </a>
@@ -216,13 +327,15 @@ if ($lastStudent && isset($lastStudent->student_id)) {
     <main class="flex-1 lg:ml-72 w-full">
         <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-10 h-24 flex items-center justify-between sticky top-0 z-30">
             <div>
-                <h2 class="text-2xl font-black text-school-blue tracking-tighter uppercase">Academic Directory</h2>
+                <h2 class="text-2xl font-black text-school-accent tracking-tighter uppercase">Academic Directory</h2>
                 <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Unified Student Record Management</p>
             </div>
-            <button onclick="toggleModal()" class="bg-school-blue px-10 py-4 rounded-[1.5rem] flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-school-blue/20 hover:scale-105 transition-all">
+            <?php if ($_SESSION['role'] !== 'Teacher'): ?>
+            <button onclick="toggleModal()" class="bg-school-accent px-10 py-4 rounded-[1.5rem] flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-school-accent/20 hover:scale-105 transition-all">
                 <i data-lucide="user-plus" class="w-4 h-4"></i>
                 <span>Enroll Student</span>
             </button>
+            <?php endif; ?>
         </header>
 
         <div class="p-10">
@@ -242,37 +355,41 @@ if ($lastStudent && isset($lastStudent->student_id)) {
                         </thead>
                         <tbody class="divide-y divide-gray-50">
                             <?php foreach ($students as $student): ?>
-                            <tr class="group hover:bg-school-blue/5 transition-all">
-                                <td class="py-6">
+                            <tr class="group hover:bg-school-accent/[0.03] transition-all">
+                                <td class="py-7">
                                     <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 rounded-2xl bg-school-blue/10 flex items-center justify-center text-school-blue overflow-hidden">
-                                            <img src="https://ui-avatars.com/api/?name=<?= urlencode($student->name) ?>&background=2D3E8B&color=fff" alt="">
+                                        <div class="w-12 h-12 rounded-2xl bg-school-accent/10 flex items-center justify-center text-school-accent overflow-hidden border border-school-accent/5">
+                                            <img src="https://ui-avatars.com/api/?name=<?= urlencode($student->name) ?>&background=<?= str_replace('#', '', $accentColor) ?>&color=fff" alt="">
                                         </div>
                                         <div>
-                                            <h4 class="text-sm font-black text-school-blue"><?= htmlspecialchars($student->name) ?></h4>
-                                            <p class="text-[9px] text-gray-400 font-bold uppercase mt-0.5"><?= htmlspecialchars($student->student_phone ?? 'N/A') ?></p>
+                                            <h4 class="text-sm font-black text-school-accent uppercase tracking-tighter"><?= htmlspecialchars($student->name) ?></h4>
+                                            <p class="text-[9px] text-gray-400 font-bold uppercase mt-0.5 tracking-widest"><?= htmlspecialchars($student->student_phone ?? 'N/A') ?></p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="py-6 text-sm font-black text-school-blue tracking-tighter"><?= htmlspecialchars($student->student_id ?? 'N/A') ?></td>
-                                <td class="py-6">
-                                    <h4 class="text-xs font-black text-school-blue"><?= htmlspecialchars($student->parent_name ?? 'N/A') ?></h4>
-                                    <p class="text-[9px] text-gray-400 font-bold uppercase"><?= htmlspecialchars($student->parent_phone ?? 'N/A') ?></p>
+                                <td class="py-7 text-sm font-black text-school-accent tracking-tighter italic">#<?= htmlspecialchars($student->student_id ?? 'N/A') ?></td>
+                                <td class="py-7">
+                                    <h4 class="text-xs font-black text-school-accent uppercase"><?= htmlspecialchars($student->parent_name ?? 'N/A') ?></h4>
+                                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest"><?= htmlspecialchars($student->parent_phone ?? 'N/A') ?></p>
                                 </td>
-                                <td class="py-6 text-xs font-black text-gray-400 uppercase tracking-tighter"><?= htmlspecialchars($student->neighborhood ?? 'N/A') ?></td>
-                                <td class="py-6">
-                                    <span class="px-4 py-1.5 <?= ($student->gender ?? '') === 'Male' ? 'bg-school-blue/10 text-school-blue' : 'bg-school-coral/10 text-school-coral' ?> rounded-full text-[9px] font-black uppercase tracking-widest"><?= $student->gender ?? 'N/A' ?></span>
+                                <td class="py-7 text-xs font-black text-gray-400 uppercase tracking-tighter"><?= htmlspecialchars($student->neighborhood ?? 'N/A') ?></td>
+                                <td class="py-7">
+                                    <span class="px-4 py-1.5 <?= ($student->gender ?? '') === 'Male' ? 'bg-blue-50 text-blue-500' : 'bg-pink-50 text-pink-500' ?> rounded-full text-[9px] font-black uppercase tracking-widest"><?= $student->gender ?? 'N/A' ?></span>
                                 </td>
-                                <td class="py-6">
+                                <td class="py-7">
                                     <div class="flex items-center text-green-500 font-black text-[9px] uppercase tracking-widest">
-                                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span> <?= $student->status ?>
+                                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 shadow-sm shadow-green-500/50"></span> <?= $student->status ?>
                                     </div>
                                 </td>
                                 <td class="py-6 text-right">
+                                    <?php if ($_SESSION['role'] !== 'Teacher'): ?>
                                     <div class="flex items-center justify-end space-x-2">
-                                        <a href="#" class="p-2.5 bg-gray-50 text-gray-400 rounded-xl hover:bg-school-blue hover:text-white transition-all inline-block"><i data-lucide="edit-3" class="w-4 h-4"></i></a>
+                                        <button onclick="openEditModal('<?= $student->_id ?>', '<?= addslashes($student->name) ?>', '<?= $student->student_phone ?>', '<?= $student->gender ?>', '<?= $student->form ?>', '<?= $student->neighborhood ?>', '<?= addslashes($student->parent_name) ?>', '<?= $student->parent_phone ?>')" class="p-2.5 bg-gray-50 text-gray-400 rounded-xl hover:bg-school-accent hover:text-white transition-all inline-block"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
                                         <a href="manage-students.php?delete_id=<?= $student->_id ?>" onclick="return confirm('Are you sure you want to delete this student?');" class="p-2.5 bg-gray-50 text-gray-400 rounded-xl hover:bg-school-coral hover:text-white transition-all inline-block"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
                                     </div>
+                                    <?php else: ?>
+                                    <span class="text-[9px] font-black text-gray-300 uppercase tracking-widest italic">View Only</span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -287,7 +404,34 @@ if ($lastStudent && isset($lastStudent->student_id)) {
         lucide.createIcons();
         function toggleModal() {
             const modal = document.getElementById('studentModal');
-            modal.classList.toggle('modal-hidden');
+            if (modal.classList.contains('modal-hidden')) {
+                modal.classList.remove('modal-hidden');
+                modal.classList.add('modal-active');
+            } else {
+                modal.classList.add('modal-hidden');
+                modal.classList.remove('modal-active');
+            }
+        }
+        function toggleEditModal() {
+            const modal = document.getElementById('editStudentModal');
+            if (modal.classList.contains('modal-hidden')) {
+                modal.classList.remove('modal-hidden');
+                modal.classList.add('modal-active');
+            } else {
+                modal.classList.add('modal-hidden');
+                modal.classList.remove('modal-active');
+            }
+        }
+        function openEditModal(id, name, phone, gender, form, neighborhood, p_name, p_phone) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-student-phone').value = phone;
+            document.getElementById('edit-gender').value = gender;
+            document.getElementById('edit-form').value = form;
+            document.getElementById('edit-neighborhood').value = neighborhood;
+            document.getElementById('edit-parent-name').value = p_name;
+            document.getElementById('edit-parent-phone').value = p_phone;
+            toggleEditModal();
         }
     </script>
 </body>

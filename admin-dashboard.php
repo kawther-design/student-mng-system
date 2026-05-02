@@ -3,7 +3,7 @@ session_start();
 require_once 'db_config.php';
 
 // Authentication Check
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['Admin', 'Vice President'])) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
     header('Location: login.php');
     exit;
 }

@@ -47,6 +47,20 @@ $attStatus = [];
 foreach ($existingAtt as $record) {
     $attStatus[$record->student_id] = $record->status;
 }
+
+// Determine Dashboard URL and Accent Color based on role
+$dashboardUrl = 'admin-dashboard.php';
+$accentColor = '#2D3E8B'; // Default Blue for Admin
+if ($_SESSION['role'] === 'Teacher') {
+    $dashboardUrl = 'teacher-dashboard.php';
+    $accentColor = '#8B5CF6'; // Purple for Teacher
+} elseif ($_SESSION['role'] === 'Parent') {
+    $dashboardUrl = 'parent-dashboard.php';
+    $accentColor = '#F97316'; // Orange for Parent
+} elseif ($_SESSION['role'] === 'Vice President') {
+    $dashboardUrl = 'vice-president-dashboard.php';
+    $accentColor = '#1DBF92'; // Teal for VP
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -63,9 +77,11 @@ foreach ($existingAtt as $record) {
                 extend: {
                     colors: {
                         school: {
+                            accent: '<?= $accentColor ?>',
                             blue: '#2D3E8B',
                             teal: '#1DBF92',
                             coral: '#FF6B52',
+                            purple: '#8B5CF6',
                             bg: '#F8FAFF'
                         }
                     },
@@ -78,9 +94,9 @@ foreach ($existingAtt as $record) {
         body { font-family: 'Outfit', sans-serif; background-color: #F8FAFF; }
         .sidebar-item { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .sidebar-item.active { 
-            background: linear-gradient(135deg, #2D3E8B 0%, #1a255a 100%);
+            background: linear-gradient(135deg, <?= $accentColor ?> 0%, #1a255a 100%);
             color: white; 
-            box-shadow: 0 15px 30px -10px rgba(45, 62, 139, 0.4); 
+            box-shadow: 0 15px 30px -10px <?= $accentColor ?>66; 
         }
         .att-card { 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -92,52 +108,62 @@ foreach ($existingAtt as $record) {
             box-shadow: 0 30px 60px -12px rgba(45, 62, 139, 0.08);
         }
         .status-radio:checked + label {
-            background-color: #2D3E8B;
+            transform: scale(1.1);
             color: white;
-            box-shadow: 0 10px 20px -5px rgba(45, 62, 139, 0.3);
+            box-shadow: 0 15px 30px -5px currentColor;
         }
-        .status-radio-present:checked + label { background-color: #1DBF92; box-shadow: 0 10px 20px -5px rgba(29, 191, 146, 0.3); }
-        .status-radio-absent:checked + label { background-color: #FF6B52; box-shadow: 0 10px 20px -5px rgba(255, 107, 82, 0.3); }
+        .status-radio-present:checked + label { background-color: #1DBF92; color: #1DBF92; }
+        .status-radio-absent:checked + label { background-color: #FF6B52; color: #FF6B52; }
+        .status-radio-late:checked + label { background-color: #F97316; color: #F97316; }
+        
+        /* Specific label color fix when checked */
+        .status-radio-present:checked + label { background-color: #1DBF92; color: white; }
+        .status-radio-absent:checked + label { background-color: #FF6B52; color: white; }
+        .status-radio-late:checked + label { background-color: #F97316; color: white; }
     </style>
 </head>
 <body class="text-gray-800 flex min-h-screen">
 
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-blue/5">
+    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-accent/5">
         <div class="flex items-center space-x-4 mb-16">
-            <div class="w-12 h-12 bg-school-blue rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-blue/20">
+            <div class="w-12 h-12 bg-school-accent rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-accent/20">
                 <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-black text-school-blue tracking-tighter">AL HUDA</h1>
+                <h1 class="text-2xl font-black text-school-accent tracking-tighter">AL HUDA</h1>
                 <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">Management v2.0</p>
             </div>
         </div>
         
         <nav class="flex-1 space-y-3">
-            <a href="admin-dashboard.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
-            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="users" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Students</span>
             </a>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+            <?php if ($_SESSION['role'] !== 'Teacher'): ?>
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="shield-check" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Users</span>
             </a>
+            <?php endif; ?>
             <a href="manage-attendance.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
                 <i data-lucide="calendar-check" class="w-5 h-5"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Attendance</span>
             </a>
-            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+            <?php if ($_SESSION['role'] !== 'Teacher'): ?>
+            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Exam & Results</span>
             </a>
+            <?php endif; ?>
         </nav>
 
         <div class="pt-8 border-t border-gray-100">
-            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-coral hover:bg-school-coral/5 transition-all group">
+            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-red-500 hover:bg-red-50 transition-all group">
                 <i data-lucide="log-out" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Sign Out</span>
             </a>
@@ -147,31 +173,56 @@ foreach ($existingAtt as $record) {
     <main class="flex-1 lg:ml-72 w-full">
         <form method="POST" class="w-full">
             <input type="hidden" name="action" value="save_attendance">
+            <input type="hidden" name="date" value="<?= $date ?>">
+            <input type="hidden" name="form" value="<?= $form ?>">
             <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-10 h-24 flex items-center justify-between sticky top-0 z-30">
                 <div>
-                    <h2 class="text-2xl font-black text-school-blue tracking-tighter uppercase">Attendance Tracker</h2>
+                    <h2 class="text-2xl font-black text-school-accent tracking-tighter uppercase">Attendance Registry</h2>
                     <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Daily Student Presence</p>
                 </div>
-                <button type="submit" class="bg-school-blue px-10 py-4 rounded-[1.5rem] flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-school-blue/20 hover:scale-105 transition-all">
-                    <i data-lucide="save" class="w-4 h-4"></i>
-                    <span>Save Records</span>
+                <button type="submit" name="save" class="px-10 py-4 bg-school-accent text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest shadow-xl shadow-school-accent/20 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed" <?= $_SESSION['role'] === 'Teacher' ? 'disabled' : '' ?>>
+                    <i data-lucide="save" class="w-4 h-4 inline-block mr-2"></i>
+                    <?= $_SESSION['role'] === 'Teacher' ? 'Read Only' : 'Save Attendance' ?>
                 </button>
             </header>
 
             <div class="p-8">
-                <div class="bg-white p-8 rounded-[3rem] shadow-xl shadow-school-blue/5 border border-gray-50 mb-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-                    <div class="flex items-center space-x-6">
-                        <div>
-                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 px-1">Selected Class</span>
-                            <select onchange="location.href='?form='+this.value+'&date=<?= $date ?>'" class="bg-gray-50 border-none rounded-xl py-3 px-6 text-sm font-black text-school-blue uppercase tracking-tighter outline-none cursor-pointer">
-                                <?php for($i=1; $i<=4; $i++): ?>
-                                    <option value="Form <?= $i ?>" <?= $form === "Form $i" ? 'selected' : '' ?>>Form <?= $i ?></option>
-                                <?php endfor; ?>
-                            </select>
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-10">
+                    <div class="lg:col-span-2 bg-white p-8 rounded-[3rem] shadow-xl shadow-school-blue/5 border border-gray-50 flex items-center justify-between">
+                        <div class="flex items-center space-x-6">
+                            <div>
+                                <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 px-1">Selected Class</span>
+                                <select onchange="location.href='?form='+this.value+'&date=<?= $date ?>'" class="bg-gray-50 border-none rounded-2xl py-4 px-8 text-sm font-black text-school-accent uppercase tracking-tighter outline-none cursor-pointer hover:bg-gray-100 transition-all">
+                                    <?php for($i=1; $i<=4; $i++): ?>
+                                        <option value="Form <?= $i ?>" <?= $form === "Form $i" ? 'selected' : '' ?>>Form <?= $i ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                            <div class="w-px h-12 bg-gray-100 mx-2"></div>
+                            <div>
+                                <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 px-1">Track Date</span>
+                                <input type="date" value="<?= $date ?>" onchange="location.href='?form=<?= $form ?>&date='+this.value" class="bg-gray-50 border-none rounded-2xl py-4 px-8 text-sm font-black text-school-accent outline-none cursor-pointer hover:bg-gray-100 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-[3rem] shadow-xl shadow-school-blue/5 border border-gray-50 flex items-center space-x-6">
+                        <div class="w-14 h-14 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center">
+                            <i data-lucide="check-circle-2" class="w-7 h-7"></i>
                         </div>
                         <div>
-                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 px-1">Track Date</span>
-                            <input type="date" value="<?= $date ?>" onchange="location.href='?form=<?= $form ?>&date='+this.value" class="bg-gray-50 border-none rounded-xl py-3 px-6 text-sm font-black text-school-blue outline-none cursor-pointer">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Present</p>
+                            <p class="text-2xl font-black text-green-500"><?= count(array_filter($attStatus, fn($s) => $s === 'Present')) ?></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-[3rem] shadow-xl shadow-school-blue/5 border border-gray-50 flex items-center space-x-6">
+                        <div class="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center">
+                            <i data-lucide="x-circle" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Absent</p>
+                            <p class="text-2xl font-black text-red-500"><?= count(array_filter($attStatus, fn($s) => $s === 'Absent')) ?></p>
                         </div>
                     </div>
                 </div>
@@ -193,25 +244,41 @@ foreach ($existingAtt as $record) {
                                 $s_id = (string)$student->_id;
                                 $status = isset($attStatus[$s_id]) ? $attStatus[$s_id] : 'Present';
                             ?>
-                            <tr class="group hover:bg-school-blue/5 transition-all">
-                                <td class="py-6">
-                                    <span class="text-sm font-black text-school-blue tracking-tighter"><?= htmlspecialchars($student->name) ?></span>
+                            <tr class="group hover:bg-school-accent/[0.02] transition-all">
+                                <td class="py-8">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 rounded-2xl bg-school-accent/10 flex items-center justify-center text-school-accent">
+                                            <i data-lucide="user-check" class="w-6 h-6"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-black text-school-accent tracking-tighter uppercase"><?= htmlspecialchars($student->name) ?></h4>
+                                            <p class="text-[9px] text-gray-400 font-bold uppercase mt-0.5">Academic Learner</p>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="py-6 text-sm font-black text-school-blue"><?= htmlspecialchars($student->student_phone ?? 'N/A') ?></td>
-                                <td class="py-6">
-                                    <div class="flex items-center justify-center space-x-8">
+                                <td class="py-8">
+                                    <div class="flex items-center text-gray-400 font-black text-[10px] uppercase tracking-widest">
+                                        <i data-lucide="phone-forwarded" class="w-3.5 h-3.5 mr-2 opacity-30"></i>
+                                        <?= htmlspecialchars($student->student_phone ?? 'N/A') ?>
+                                    </div>
+                                </td>
+                                <td class="py-8">
+                                    <div class="flex items-center justify-center space-x-4 lg:space-x-8">
                                         <?php 
-                                        $options = ['Present' => 'P', 'Absent' => 'A', 'Late' => 'L'];
-                                        $colors = ['Present' => 'school-teal', 'Absent' => 'school-coral', 'Late' => 'school-yellow'];
-                                        foreach ($options as $full => $short): 
+                                        $options = [
+                                            'Present' => ['S' => 'P', 'I' => 'check-circle-2', 'C' => 'present'], 
+                                            'Absent' => ['S' => 'A', 'I' => 'x-circle', 'C' => 'absent'], 
+                                            'Late' => ['S' => 'L', 'I' => 'clock', 'C' => 'late']
+                                        ];
+                                        foreach ($options as $full => $meta): 
                                         ?>
                                         <div class="flex flex-col items-center">
                                             <input type="hidden" name="student_names[<?= $s_id ?>]" value="<?= htmlspecialchars($student->name) ?>">
-                                            <input type="radio" id="att_<?= $s_id ?>_<?= $short ?>" name="attendance[<?= $s_id ?>]" value="<?= $full ?>" <?= $status == $full ? 'checked' : '' ?> class="hidden peer status-radio status-radio-<?= strtolower($full) ?>">
-                                            <label for="att_<?= $s_id ?>_<?= $short ?>" class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 font-black text-[10px] transition-all cursor-pointer">
-                                                <?= $short ?>
+                                            <input type="radio" id="att_<?= $s_id ?>_<?= $meta['S'] ?>" name="attendance[<?= $s_id ?>]" value="<?= $full ?>" <?= $status == $full ? 'checked' : '' ?> class="hidden peer status-radio status-radio-<?= $meta['C'] ?>">
+                                            <label for="att_<?= $s_id ?>_<?= $meta['S'] ?>" class="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-300 hover:bg-gray-100 transition-all cursor-pointer peer-checked:shadow-2xl">
+                                                <i data-lucide="<?= $meta['I'] ?>" class="w-6 h-6"></i>
                                             </label>
-                                            <span class="text-[8px] font-black text-gray-400 mt-2 uppercase tracking-widest pointer-events-none"><?= $full ?></span>
+                                            <span class="text-[8px] font-black text-gray-400 mt-3 uppercase tracking-widest pointer-events-none"><?= $full ?></span>
                                         </div>
                                         <?php endforeach; ?>
                                     </div>
