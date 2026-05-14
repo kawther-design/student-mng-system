@@ -40,6 +40,10 @@ $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $studentColl = $database->getCollection('students');
 $students = $studentColl->find(['form' => $form], ['sort' => ['name' => 1]])->toArray();
 
+// Get all unique classes for the dropdown
+$allClasses = $studentColl->distinct('form');
+sort($allClasses);
+
 // Fetch existing attendance for the date
 $attColl = $database->getCollection('attendance');
 $existingAtt = $attColl->find(['form' => $form, 'date' => $date])->toArray();
@@ -93,9 +97,10 @@ if ($_SESSION['role'] === 'Teacher') {
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #F8FAFF; }
         .sidebar-item { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sidebar-item.active { 
-            background: linear-gradient(135deg, <?= $accentColor ?> 0%, #1a255a 100%);
-            color: white; 
+        .sidebar-item { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-item.active, .sidebar-item:hover { 
+            background: linear-gradient(135deg, <?= $accentColor ?> 0%, #1a255a 100%) !important;
+            color: white !important; 
             box-shadow: 0 15px 30px -10px <?= $accentColor ?>66; 
         }
         .att-card { 
@@ -136,27 +141,54 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
         
         <nav class="flex-1 space-y-3">
-            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
+            
+            <?php if ($_SESSION['role'] === 'Vice President'): ?>
             <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
-                <i data-lucide="users" class="w-5 h-5"></i>
-                <span class="font-bold text-sm">Students</span>
+                <i data-lucide="user-plus" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Student Registration</span>
             </a>
-            <?php if ($_SESSION['role'] !== 'Teacher'): ?>
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+                <i data-lucide="users" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Teachers Registration</span>
+            </a>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['role'] === 'Admin'): ?>
             <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="shield-check" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Users</span>
             </a>
-            <?php endif; ?>
             <a href="manage-attendance.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
                 <i data-lucide="calendar-check" class="w-5 h-5"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Attendance</span>
             </a>
-            <?php if ($_SESSION['role'] !== 'Teacher'): ?>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['role'] === 'Teacher'): ?>
+            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <span class="font-bold text-sm">Students</span>
+            </a>
+            <a href="manage-attendance.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
+                <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                <span class="font-black text-sm uppercase tracking-widest">Attendance</span>
+            </a>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['role'] !== 'Teacher' && $_SESSION['role'] !== 'Vice President'): ?>
             <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+                <span class="font-bold text-sm">Exam & Results</span>
+            </a>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['role'] === 'Vice President'): ?>
+            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+                <i data-lucide="file-spreadsheet" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Exam & Results</span>
             </a>
             <?php endif; ?>
@@ -180,9 +212,9 @@ if ($_SESSION['role'] === 'Teacher') {
                     <h2 class="text-2xl font-black text-school-accent tracking-tighter uppercase">Attendance Registry</h2>
                     <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Daily Student Presence</p>
                 </div>
-                <button type="submit" name="save" class="px-10 py-4 bg-school-accent text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest shadow-xl shadow-school-accent/20 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed" <?= $_SESSION['role'] === 'Teacher' ? 'disabled' : '' ?>>
+                <button type="submit" name="save" class="px-10 py-4 bg-school-accent text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest shadow-xl shadow-school-accent/20 hover:scale-105 transition-all">
                     <i data-lucide="save" class="w-4 h-4 inline-block mr-2"></i>
-                    <?= $_SESSION['role'] === 'Teacher' ? 'Read Only' : 'Save Attendance' ?>
+                    Save Attendance
                 </button>
             </header>
 
@@ -193,9 +225,14 @@ if ($_SESSION['role'] === 'Teacher') {
                             <div>
                                 <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 px-1">Selected Class</span>
                                 <select onchange="location.href='?form='+this.value+'&date=<?= $date ?>'" class="bg-gray-50 border-none rounded-2xl py-4 px-8 text-sm font-black text-school-accent uppercase tracking-tighter outline-none cursor-pointer hover:bg-gray-100 transition-all">
-                                    <?php for($i=1; $i<=4; $i++): ?>
-                                        <option value="Form <?= $i ?>" <?= $form === "Form $i" ? 'selected' : '' ?>>Form <?= $i ?></option>
-                                    <?php endfor; ?>
+                                    <?php if (empty($allClasses)): ?>
+                                        <option value="">No Classes Found</option>
+                                    <?php else: ?>
+                                        <?php foreach($allClasses as $className): ?>
+                                            <?php if (empty($className)) continue; ?>
+                                            <option value="<?= htmlspecialchars($className) ?>" <?= $form === $className ? 'selected' : '' ?>><?= htmlspecialchars($className) ?></option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 </select>
                             </div>
                             <div class="w-px h-12 bg-gray-100 mx-2"></div>

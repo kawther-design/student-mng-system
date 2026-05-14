@@ -8,6 +8,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Parent') {
         exit;
     }
 }
+
+// Fetch children associated with this parent
+$collection = $database->getCollection('students');
+$parentName = $_SESSION['name'];
+$children = $collection->find(['parent_name' => $parentName])->toArray();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,6 +58,17 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Parent') {
             transform: translateY(-12px); 
             box-shadow: 0 40px 80px -20px rgba(249, 115, 22, 0.1);
         }
+        .child-gradient {
+            background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(255,247,237,0.5) 100%);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="text-gray-800 flex min-h-screen">
@@ -69,25 +85,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Parent') {
         
         <nav class="flex-1 space-y-3">
             <a href="parent-dashboard.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
-                <i data-lucide="layout-grid" class="w-5 h-5"></i>
-                <span class="font-black text-sm uppercase tracking-widest">Overview</span>
-            </a>
-            <a href="#" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-coral hover:bg-school-coral/5 transition-all">
                 <i data-lucide="users" class="w-5 h-5"></i>
-                <span class="font-bold text-sm">My Children</span>
-            </a>
-            <a href="#" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-coral hover:bg-school-coral/5 transition-all">
-                <i data-lucide="file-text" class="w-5 h-5"></i>
-                <span class="font-bold text-sm">Report Cards</span>
-            </a>
-            <a href="#" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-coral hover:bg-school-coral/5 transition-all">
-                <i data-lucide="bell" class="w-5 h-5"></i>
-                <span class="font-bold text-sm">Notices</span>
+                <span class="font-black text-sm uppercase tracking-widest">My Children</span>
             </a>
         </nav>
 
         <div class="pt-8 border-t border-gray-100">
-            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:bg-gray-50 transition-all group">
+            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-coral hover:bg-school-coral/5 transition-all group">
                 <i data-lucide="log-out" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Sign Out</span>
             </a>
@@ -98,66 +102,81 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Parent') {
         <header class="flex justify-between items-center mb-16">
             <div>
                 <h2 class="text-3xl font-black text-school-coral tracking-tighter uppercase">Welcome, <?= explode(' ', $_SESSION['name'])[0] ?></h2>
-                <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mt-1">Parent Portal | Academic Tracking</p>
+                <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mt-1">Parent Portal | My Children Tracking</p>
             </div>
             <div class="w-14 h-14 rounded-[1.5rem] bg-school-coral/10 p-1 border-2 border-school-coral/10 flex items-center justify-center text-school-coral">
                 <i data-lucide="user" class="w-7 h-7"></i>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            <div class="glass-card rounded-[4rem] p-12">
-                <div class="flex items-center justify-between mb-10">
-                    <h3 class="text-2xl font-black text-school-coral tracking-tighter uppercase">Student Progress</h3>
-                    <div class="p-4 bg-school-coral/10 text-school-coral rounded-2xl"><i data-lucide="trending-up" class="w-6 h-6"></i></div>
-                </div>
-                <div class="space-y-8">
-                    <div class="p-8 bg-gray-50/50 rounded-[2.5rem] border border-gray-100">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h4 class="text-lg font-black text-school-blue uppercase tracking-tight">Abdirahman Ali</h4>
-                                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Secondary Form 3A</p>
-                            </div>
-                            <span class="px-5 py-2 bg-school-coral text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-school-coral/20">Grade: A</span>
-                        </div>
-                        <div class="w-full bg-gray-200/50 h-3 rounded-full overflow-hidden mb-3">
-                            <div class="bg-school-coral h-full w-[85%] rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]"></div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Attendance</span>
-                            <span class="text-[10px] text-school-coral font-black uppercase tracking-widest">96% Status</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="mb-10">
+            <h3 class="text-xl font-black text-school-blue uppercase tracking-widest border-l-4 border-school-coral pl-4">Your Registered Children</h3>
+        </div>
 
-            <div class="space-y-10">
-                <div class="bg-school-coral rounded-[4rem] p-12 text-white shadow-2xl shadow-school-coral/30 relative overflow-hidden group">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+            <?php if (count($children) > 0): ?>
+                <?php foreach ($children as $index => $child): ?>
+                <div class="glass-card rounded-[3rem] p-8 relative overflow-hidden animate-fade-in" style="animation-delay: <?= $index * 0.1 ?>s">
                     <div class="relative z-10">
-                        <h3 class="text-2xl font-black uppercase tracking-tighter mb-1">Financial Overview</h3>
-                        <p class="text-white/40 text-[10px] font-bold uppercase tracking-widest">Current Balance Status</p>
-                        <p class="text-6xl font-black mt-10 tracking-tighter">$150.00</p>
-                        <button class="mt-10 px-10 py-5 bg-white text-school-coral rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Secure Online Payment</button>
-                    </div>
-                    <i data-lucide="credit-card" class="absolute -bottom-10 -right-10 w-56 h-56 text-white/5 opacity-10 group-hover:scale-110 transition-transform duration-1000"></i>
-                </div>
-
-                <div class="glass-card rounded-[4rem] p-12">
-                    <div class="flex items-center justify-between mb-8">
-                        <h3 class="text-xl font-black text-school-coral tracking-tighter uppercase">Notice Board</h3>
-                        <div class="w-10 h-10 bg-school-coral/10 text-school-coral rounded-xl flex items-center justify-center"><i data-lucide="megaphone" class="w-5 h-5"></i></div>
-                    </div>
-                    <div class="p-8 border-l-8 border-school-coral bg-school-coral/[0.03] rounded-r-[2.5rem]">
-                        <p class="text-md font-bold text-school-blue leading-relaxed">Parents-Teachers Meeting scheduled for coming Saturday at 9:00 AM.</p>
-                        <div class="flex items-center space-x-2 mt-4">
-                            <span class="w-2 h-2 rounded-full bg-school-coral animate-pulse"></span>
-                            <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest">Posted 2 hours ago by Office</p>
+                        <div class="flex items-start justify-between mb-8">
+                            <div class="w-20 h-20 rounded-[2rem] bg-school-coral/10 p-1 border-2 border-school-coral/5 flex items-center justify-center overflow-hidden">
+                                <img src="https://ui-avatars.com/api/?name=<?= urlencode($child->name) ?>&background=F97316&color=fff&size=128" alt="<?= htmlspecialchars($child->name) ?>" class="w-full h-full rounded-[1.8rem] object-cover">
+                            </div>
+                            <span class="px-4 py-2 bg-school-blue text-white rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg"><?= htmlspecialchars($child->form) ?></span>
                         </div>
+
+                        <div class="mb-8">
+                            <h4 class="text-xl font-black text-school-blue tracking-tighter uppercase mb-1"><?= htmlspecialchars($child->name) ?></h4>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Student ID:</span>
+                                <span class="text-[10px] font-black text-school-coral italic">#<?= htmlspecialchars($child->student_id ?? 'N/A') ?></span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Attendance</span>
+                                    <span class="text-[10px] text-school-coral font-black uppercase tracking-widest">96%</span>
+                                </div>
+                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-school-coral h-full w-[96%] rounded-full shadow-[0_0_10px_rgba(249,115,22,0.3)]"></div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-school-coral/5 p-4 rounded-3xl border border-school-coral/10 text-center">
+                                    <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Status</p>
+                                    <p class="text-[10px] font-black text-school-coral uppercase">Active</p>
+                                </div>
+                                <div class="bg-school-blue/5 p-4 rounded-3xl border border-school-blue/10 text-center">
+                                    <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Grade</p>
+                                    <p class="text-[10px] font-black text-school-blue uppercase">A (Dist.)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="w-full mt-8 py-4 bg-white border border-gray-100 text-school-blue rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-school-blue hover:text-white hover:scale-[1.02] transition-all flex items-center justify-center space-x-3 group">
+                            <span>View Full Report</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                        </button>
                     </div>
+                    <!-- Decorative background icon -->
+                    <i data-lucide="graduation-cap" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-coral/5 rotate-12"></i>
                 </div>
-            </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-span-full glass-card rounded-[3rem] p-20 text-center">
+                    <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="search-x" class="w-12 h-12 text-gray-300"></i>
+                    </div>
+                    <h4 class="text-2xl font-black text-school-blue uppercase tracking-tighter mb-2">No Children Found</h4>
+                    <p class="text-gray-400 text-sm font-medium">We couldn't find any students registered under your name.</p>
+                </div>
+            <?php endif; ?>
         </div>
     </main>
     <script>lucide.createIcons();</script>
 </body>
 </html>
+

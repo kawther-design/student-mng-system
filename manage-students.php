@@ -11,12 +11,15 @@ if (!isset($_SESSION['user_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_student') {
     $collection = $database->getCollection('students');
     
+    // Combine Level and Section if they exist, otherwise use 'form'
+    $formValue = isset($_POST['level']) && isset($_POST['section']) ? $_POST['level'] . ' ' . $_POST['section'] : $_POST['form'];
+
     $studentData = [
         'student_id' => $_POST['student_id'],
         'name' => $_POST['name'],
         'student_phone' => $_POST['student_phone'],
         'gender' => $_POST['gender'],
-        'form' => $_POST['form'],
+        'form' => trim($formValue),
         'neighborhood' => $_POST['neighborhood'],
         'parent_name' => $_POST['parent_name'],
         'parent_phone' => $_POST['parent_phone'],
@@ -34,11 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $collection = $database->getCollection('students');
     $studentId = new MongoDB\BSON\ObjectId($_POST['_id']);
     
+    // Combine Level and Section if they exist, otherwise use 'form'
+    $formValue = isset($_POST['level']) && isset($_POST['section']) ? $_POST['level'] . ' ' . $_POST['section'] : $_POST['form'];
+
     $updateData = [
         'name' => $_POST['name'],
         'student_phone' => $_POST['student_phone'],
         'gender' => $_POST['gender'],
-        'form' => $_POST['form'],
+        'form' => trim($formValue),
         'neighborhood' => $_POST['neighborhood'],
         'parent_name' => $_POST['parent_name'],
         'parent_phone' => $_POST['parent_phone']
@@ -57,22 +63,50 @@ if (isset($_GET['delete_id'])) {
     exit;
 }
 
-// Fetch Students
+// Fetch Students with filtering
 $collection = $database->getCollection('students');
-$students = $collection->find([], ['sort' => ['name' => 1]])->toArray();
 
-// Generate next Student ID (4-digit format)
-$lastStudent = $collection->findOne(['student_id' => ['$exists' => true]], ['sort' => ['student_id' => -1]]);
-$nextStudentId = '1001';
-if ($lastStudent && isset($lastStudent->student_id)) {
-    $lastId = (int)$lastStudent->student_id;
-    // Ensure we are working with the 4-digit logic even if old 7-digit IDs exist
-    if ($lastId >= 2026001) {
-        $nextStudentId = '1001'; // Reset or handle as needed, but for new 4-digit:
-    } else if ($lastId >= 1000) {
-        $nextStudentId = (string)($lastId + 1);
+$filter = [];
+$currentFilter = $_GET['class_filter'] ?? '';
+if ($currentFilter) {
+    $filter['form'] = $currentFilter;
+}
+
+$students = $collection->find($filter, ['sort' => ['name' => 1]])->toArray();
+
+// Get unique classes and group them for filtering
+$allClasses = $collection->distinct('form');
+$groupedClasses = [
+    'Form 1' => [],
+    'Form 2' => [],
+    'Form 3' => [],
+    'Form 4' => []
+];
+
+foreach ($allClasses as $class) {
+    $class = trim($class);
+    if (empty($class)) continue;
+    foreach ($groupedClasses as $baseForm => &$subs) {
+        if (stripos($class, $baseForm) === 0) {
+            if ($class !== $baseForm) {
+                $subs[] = $class;
+            }
+            break;
+        }
     }
 }
+foreach ($groupedClasses as &$subs) sort($subs);
+
+// Generate next Student ID (Strictly Sequential 4-digit)
+$allStudents = $collection->find(['student_id' => ['$exists' => true]])->toArray();
+$maxId = 1000;
+foreach ($allStudents as $s) {
+    $idVal = (int)$s->student_id;
+    if ($idVal > $maxId && $idVal < 10000) { // Focus on 4-digit range
+        $maxId = $idVal;
+    }
+}
+$nextStudentId = (string)($maxId + 1);
 
 // Determine Dashboard URL and Accent Color based on role
 $dashboardUrl = 'admin-dashboard.php';
@@ -119,9 +153,9 @@ if ($_SESSION['role'] === 'Teacher') {
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #F8FAFF; }
         .sidebar-item { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sidebar-item.active { 
-            background: linear-gradient(135deg, <?= $accentColor ?> 0%, #1a255a 100%);
-            color: white; 
+        .sidebar-item.active, .sidebar-item:hover { 
+            background: linear-gradient(135deg, <?= $accentColor ?> 0%, #1a255a 100%) !important;
+            color: white !important; 
             box-shadow: 0 15px 30px -10px <?= $accentColor ?>66; 
         }
         .student-card { 
@@ -137,6 +171,26 @@ if ($_SESSION['role'] === 'Teacher') {
         .modal-hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
         .modal-active { opacity: 1; pointer-events: auto; transform: scale(1); }
         .transition-modal { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .filter-dropdown { 
+            display: none; 
+            position: absolute; 
+            top: 100%; 
+            left: 0; 
+            z-index: 50; 
+            min-width: 200px; 
+            background: white; 
+            border-radius: 1.5rem; 
+            padding: 1rem; 
+            box-shadow: 0 25px 50px -12px rgba(45, 62, 139, 0.25); 
+            border: 1px solid rgba(0, 0, 0, 0.05); 
+            margin-top: 0.5rem;
+        }
+        .filter-group { position: relative; }
+        .filter-group:hover .filter-dropdown { display: block; animation: slideDown 0.2s ease-out; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="text-gray-800 flex min-h-screen">
@@ -176,12 +230,22 @@ if ($_SESSION['role'] === 'Teacher') {
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Academic Level</label>
-                        <select name="form" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
-                            <option>Form 1</option>
-                            <option>Form 2</option>
-                            <option>Form 3</option>
-                            <option>Form 4</option>
-                        </select>
+                        <div class="grid grid-cols-2 gap-4">
+                            <select name="level" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
+                                <option>Form 1</option>
+                                <option>Form 2</option>
+                                <option>Form 3</option>
+                                <option>Form 4</option>
+                            </select>
+                            <select name="section" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
+                                <option value="">No Section</option>
+                                <option>A</option>
+                                <option>B</option>
+                                <option>C</option>
+                                <option>D</option>
+                                <option>E</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Resident Area</label>
@@ -242,12 +306,22 @@ if ($_SESSION['role'] === 'Teacher') {
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Academic Level</label>
-                        <select name="form" id="edit-form" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
-                            <option>Form 1</option>
-                            <option>Form 2</option>
-                            <option>Form 3</option>
-                            <option>Form 4</option>
-                        </select>
+                        <div class="grid grid-cols-2 gap-4">
+                            <select name="level" id="edit-level" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
+                                <option>Form 1</option>
+                                <option>Form 2</option>
+                                <option>Form 3</option>
+                                <option>Form 4</option>
+                            </select>
+                            <select name="section" id="edit-section" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer">
+                                <option value="">No Section</option>
+                                <option>A</option>
+                                <option>B</option>
+                                <option>C</option>
+                                <option>D</option>
+                                <option>E</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Resident Area</label>
@@ -292,28 +366,33 @@ if ($_SESSION['role'] === 'Teacher') {
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
+            
+            <?php if ($_SESSION['role'] === 'Vice President'): ?>
             <a href="manage-students.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
-                <i data-lucide="<?= $_SESSION['role'] === 'Vice President' ? 'user-plus' : 'users' ?>" class="w-5 h-5"></i>
-                <span class="font-black text-sm uppercase tracking-widest"><?= $_SESSION['role'] === 'Vice President' ? 'Student Registration' : 'Students' ?></span>
+                <i data-lucide="user-plus" class="w-5 h-5"></i>
+                <span class="font-black text-sm uppercase tracking-widest">Student Registration</span>
             </a>
-            <?php if ($_SESSION['role'] !== 'Teacher'): ?>
             <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
-                <i data-lucide="<?= $_SESSION['role'] === 'Vice President' ? 'users' : 'shield-check' ?>" class="w-5 h-5"></i>
-                <span class="font-bold text-sm"><?= $_SESSION['role'] === 'Vice President' ? 'Teachers Registration' : 'Users' ?></span>
+                <i data-lucide="users" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Teachers Registration</span>
             </a>
             <?php endif; ?>
-            <?php if ($_SESSION['role'] !== 'Vice President'): ?>
+
+            <?php if ($_SESSION['role'] === 'Admin'): ?>
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+                <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Users</span>
+            </a>
             <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="calendar-check" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Attendance</span>
             </a>
             <?php endif; ?>
-            <?php if ($_SESSION['role'] !== 'Teacher'): ?>
+
             <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
-                <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
-                <span class="font-bold text-sm"><?= $_SESSION['role'] === 'Vice President' ? 'Exam & Result' : 'Exam & Results' ?></span>
+                <i data-lucide="file-spreadsheet" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Exam & Results</span>
             </a>
-            <?php endif; ?>
         </nav>
 
         <div class="pt-8 border-t border-gray-100">
@@ -338,7 +417,36 @@ if ($_SESSION['role'] === 'Teacher') {
             <?php endif; ?>
         </header>
 
-        <div class="p-10">
+        <div class="px-10 py-6 relative z-40">
+            <div class="flex items-center space-x-6 pb-4">
+                <a href="manage-students.php" class="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all <?= !$currentFilter ? 'bg-school-accent text-white shadow-lg shadow-school-accent/30' : 'bg-white text-gray-400 hover:text-school-accent' ?>">
+                    All Students
+                </a>
+                
+                <?php foreach ($groupedClasses as $baseForm => $subs): ?>
+                <div class="relative filter-group">
+                    <a href="manage-students.php?class_filter=<?= urlencode($baseForm) ?>" class="flex items-center space-x-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all <?= (strpos($currentFilter, $baseForm) === 0) ? 'bg-school-accent text-white shadow-lg shadow-school-accent/30' : 'bg-white text-gray-400 hover:text-school-accent' ?>">
+                        <span><?= $baseForm ?></span>
+                        <?php if (!empty($subs)): ?>
+                        <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                        <?php endif; ?>
+                    </a>
+                    
+                    <?php if (!empty($subs)): ?>
+                    <div class="filter-dropdown mt-2">
+                        <?php foreach ($subs as $sub): ?>
+                        <a href="manage-students.php?class_filter=<?= urlencode($sub) ?>" class="block px-5 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-school-accent/5 <?= $currentFilter === $sub ? 'text-school-accent' : 'text-gray-400' ?>">
+                            <?= htmlspecialchars($sub) ?>
+                        </a>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <div class="p-10 pt-0">
             <div class="bg-white rounded-[3rem] p-10 shadow-xl shadow-school-blue/5 border border-gray-50">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
@@ -427,7 +535,19 @@ if ($_SESSION['role'] === 'Teacher') {
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-student-phone').value = phone;
             document.getElementById('edit-gender').value = gender;
-            document.getElementById('edit-form').value = form;
+            
+            // Parse form into Level and Section
+            let level = form;
+            let section = "";
+            if (form.includes(" ")) {
+                const parts = form.split(" ");
+                level = parts[0] + " " + parts[1]; // "Form 1"
+                section = parts[2] || ""; // "A"
+            }
+            
+            document.getElementById('edit-level').value = level;
+            document.getElementById('edit-section').value = section;
+            
             document.getElementById('edit-neighborhood').value = neighborhood;
             document.getElementById('edit-parent-name').value = p_name;
             document.getElementById('edit-parent-phone').value = p_phone;

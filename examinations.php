@@ -13,60 +13,132 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center mb-32">
-                <div>
-                    <h3 class="text-4xl font-black text-school-blue tracking-tighter uppercase mb-8 leading-tight">A Transparent Evaluation<br>Framework</h3>
-                    <p class="text-gray-500 text-sm font-medium mb-12 leading-relaxed">
-                        At Al Huda, we utilize a combination of continuous assessment and final examinations to provide a comprehensive view of student performance.
-                    </p>
-                    <div class="space-y-10">
-                        <div class="flex items-start space-x-8">
-                            <div class="w-14 h-14 bg-white rounded-[1.5rem] flex items-center justify-center text-school-blue shadow-xl shadow-school-blue/5 flex-shrink-0">
-                                <i data-lucide="file-text" class="w-7 h-7"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-black text-school-blue text-lg uppercase tracking-tight">Quarterly Midterms</h4>
-                                <p class="text-gray-400 text-[11px] font-bold uppercase tracking-widest mt-2">March & October Cycles</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-8">
-                            <div class="w-14 h-14 bg-white rounded-[1.5rem] flex items-center justify-center text-school-teal shadow-xl shadow-school-teal/5 flex-shrink-0">
-                                <i data-lucide="check-square" class="w-7 h-7"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-black text-school-blue text-lg uppercase tracking-tight">Final Examinations</h4>
-                                <p class="text-gray-400 text-[11px] font-bold uppercase tracking-widest mt-2">Comprehensive Term Assessments</p>
-                            </div>
-                        </div>
-                    </div>
+            <div class="max-w-4xl mx-auto bg-white rounded-[4rem] p-12 lg:p-20 shadow-2xl shadow-school-blue/5 border border-gray-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-school-blue/5 rounded-full -mr-32 -mt-32"></div>
+                
+                <div class="relative z-10 text-center mb-16">
+                    <h3 class="text-4xl font-black text-school-blue tracking-tighter uppercase mb-4">Check Your Performance</h3>
+                    <p class="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em]">Enter your unique Student ID to view your academic transcript</p>
                 </div>
-                <div class="bg-white p-12 rounded-[4rem] shadow-2xl shadow-school-blue/5 border border-gray-100 relative">
-                    <div class="absolute -top-6 -right-6 w-24 h-24 bg-school-teal text-white rounded-full flex items-center justify-center font-black text-xs uppercase tracking-widest shadow-xl shadow-school-teal/30">Top Score</div>
-                    <div class="flex items-center justify-between mb-12">
-                        <h4 class="font-black text-school-blue uppercase tracking-[0.2em] text-xs">Batch Performance</h4>
-                        <span class="px-5 py-2 bg-school-teal/5 text-school-teal text-[10px] font-black rounded-full uppercase tracking-widest">2026 Season</span>
-                    </div>
-                    <div class="space-y-10">
+
+                <form method="POST" autocomplete="off" class="relative z-10 flex flex-col space-y-10 mb-16">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div class="space-y-4">
-                            <div class="flex justify-between items-center">
-                                <span class="font-black text-school-blue text-xs uppercase tracking-widest">Overall Pass Rate</span>
-                                <span class="font-black text-school-teal text-xl">98.5%</span>
-                            </div>
-                            <div class="w-full h-3 bg-gray-50 rounded-full overflow-hidden">
-                                <div class="h-full bg-school-teal" style="width: 98.5%"></div>
+                            <label class="block text-[10px] font-black text-school-blue uppercase tracking-[0.4em] ml-4">01. Student Identity</label>
+                            <div class="relative w-full">
+                                <i data-lucide="user" class="absolute left-8 top-1/2 -translate-y-1/2 text-school-blue w-5 h-5"></i>
+                                <input type="text" name="student_id" required autocomplete="off" placeholder="Ex: 1001" class="w-full bg-white border-2 border-gray-100 shadow-xl shadow-school-blue/5 focus:border-school-blue focus:ring-0 rounded-[2rem] py-7 pl-20 pr-8 outline-none text-base font-black text-school-blue transition-all uppercase tracking-widest placeholder:text-gray-200">
                             </div>
                         </div>
                         <div class="space-y-4">
-                            <div class="flex justify-between items-center">
-                                <span class="font-black text-school-blue text-xs uppercase tracking-widest">A+ Grade Average</span>
-                                <span class="font-black text-school-coral text-xl">84.2%</span>
-                            </div>
-                            <div class="w-full h-3 bg-gray-50 rounded-full overflow-hidden">
-                                <div class="h-full bg-school-coral" style="width: 84.2%"></div>
+                            <label class="block text-[10px] font-black text-school-blue uppercase tracking-[0.4em] ml-4">02. Access Password</label>
+                            <div class="relative w-full">
+                                <i data-lucide="lock" class="absolute left-8 top-1/2 -translate-y-1/2 text-school-blue w-5 h-5"></i>
+                                <input type="password" name="password" required autocomplete="new-password" placeholder="••••••••" class="w-full bg-white border-2 border-gray-100 shadow-xl shadow-school-blue/5 focus:border-school-blue focus:ring-0 rounded-[2rem] py-7 pl-20 pr-8 outline-none text-base font-black text-school-blue transition-all uppercase tracking-widest placeholder:text-gray-200">
                             </div>
                         </div>
                     </div>
-                </div>
+                    <div class="flex flex-col items-center space-y-6">
+                        <button type="submit" class="w-full max-w-md py-7 bg-school-blue text-white rounded-[2.5rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-school-blue/30 hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center space-x-4 group">
+                            <i data-lucide="shield-check" class="w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                            <span>Securely Retrieve Result</span>
+                        </button>
+                        <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center">Note: Your password is your Student ID by default</p>
+                    </div>
+                </form>
+
+                <?php 
+                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'])): 
+                    require_once 'db_config.php';
+                    $student_id_raw = trim($_POST['student_id']);
+                    $password_raw = $_POST['password'] ?? '';
+                    $studentColl = $database->getCollection('students');
+                    $student = $studentColl->findOne(['student_id' => $student_id_raw]);
+                    
+                    if ($student):
+                        // Simple Logic: Password matches ID or Phone
+                        $is_valid = ($password_raw === $student->student_id) || ($password_raw === ($student->student_phone ?? ''));
+                        
+                        if ($is_valid):
+                            $resultsColl = $database->getCollection('results');
+                            $examColl = $database->getCollection('exams');
+                            $results = $resultsColl->find(['student_id' => (string)$student->_id])->toArray();
+                            
+                            if (!empty($results)):
+                ?>
+                            <div class="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                                <?php foreach ($results as $res): 
+                                    $exam = $examColl->findOne(['_id' => new MongoDB\BSON\ObjectId($res->exam_id)]);
+                                ?>
+                                <div class="p-10 bg-gray-50/50 rounded-[3rem] border border-gray-100 relative print:shadow-none print:border-none">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
+                                        <div>
+                                            <h4 class="text-2xl font-black text-school-blue uppercase tracking-tighter"><?= htmlspecialchars($exam->name ?? 'Assessment Result') ?></h4>
+                                            <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1 italic"><?= htmlspecialchars($student->name) ?> | <?= htmlspecialchars($student->form) ?></p>
+                                        </div>
+                                        <div class="flex items-center space-x-6">
+                                            <div class="text-right">
+                                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total & Percentage</p>
+                                                <p class="text-3xl font-black text-school-blue"><?= $res->total_marks ?> <span class="text-xs text-gray-300">/ 1000</span> <span class="text-school-coral ml-2"><?= number_format($res->total_marks / 10, 1) ?>%</span></p>
+                                            </div>
+                                            <div class="w-16 h-16 bg-school-teal text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shadow-school-teal/20">
+                                                <?php 
+                                                    $avg = $res->total_marks / 10;
+                                                    if ($avg >= 90) echo 'A+';
+                                                    elseif ($avg >= 80) echo 'A';
+                                                    elseif ($avg >= 70) echo 'B';
+                                                    elseif ($avg >= 60) echo 'C';
+                                                    elseif ($avg >= 50) echo 'D';
+                                                    else echo 'F';
+                                                ?>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                        <?php 
+                                        $subjects = [
+                                            'arabic' => 'Arabic', 'islamic' => 'Islamic', 'biology' => 'Biology', 
+                                            'physics' => 'Physics', 'mathematics' => 'Math', 'chemistry' => 'Chem', 
+                                            'somali' => 'Somali', 'english' => 'English', 'history' => 'History', 
+                                            'geography' => 'Geog'
+                                        ];
+                                        foreach ($subjects as $key => $label): 
+                                            $mark = $res->marks->$key ?? 0;
+                                        ?>
+                                        <div class="bg-white p-5 rounded-[1.5rem] border border-gray-50 flex flex-col items-center justify-center space-y-2">
+                                            <span class="text-[8px] font-black text-gray-300 uppercase tracking-widest"><?= $label ?></span>
+                                            <span class="text-lg font-black <?= $mark >= 50 ? 'text-school-blue' : 'text-school-coral' ?>"><?= $mark ?></span>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+
+                                    <button onclick="window.print()" class="mt-8 text-[9px] font-black text-gray-400 uppercase tracking-widest flex items-center hover:text-school-blue transition-all print:hidden">
+                                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i>
+                                        Download Official Transcript
+                                    </button>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php else: ?>
+                            <div class="p-12 bg-red-50 text-red-500 rounded-[3rem] text-center">
+                                <i data-lucide="shield-x" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                                <p class="text-sm font-black uppercase tracking-widest">Access Denied. The password you entered is incorrect.</p>
+                            </div>
+                        <?php endif; ?>
+                    <?php else: ?>
+                            <div class="p-12 bg-red-50 text-red-500 rounded-[3rem] text-center">
+                                <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                                <p class="text-sm font-black uppercase tracking-widest">No examination results found for this student ID yet.</p>
+                            </div>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <div class="p-12 bg-red-50 text-red-500 rounded-[3rem] text-center">
+                            <i data-lucide="user-x" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                            <p class="text-sm font-black uppercase tracking-widest">Student ID not recognized. Please check your ID and try again.</p>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
             </div>
         </div>
     </section>

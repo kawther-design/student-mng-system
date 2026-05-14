@@ -125,9 +125,9 @@ if ($_SESSION['role'] === 'Teacher') {
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #F8FAFF; }
         .sidebar-item { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sidebar-item.active { 
-            background: linear-gradient(135deg, <?= $accentColor ?> 0%, #1a255a 100%);
-            color: white; 
+        .sidebar-item.active, .sidebar-item:hover { 
+            background: linear-gradient(135deg, <?= $accentColor ?> 0%, #1a255a 100%) !important;
+            color: white !important; 
             box-shadow: 0 15px 30px -10px <?= $accentColor ?>66; 
         }
         .user-table-row { 
@@ -319,23 +319,32 @@ if ($_SESSION['role'] === 'Teacher') {
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
+            
+            <?php if ($_SESSION['role'] === 'Vice President'): ?>
             <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
-                <i data-lucide="<?= $_SESSION['role'] === 'Vice President' ? 'user-plus' : 'users' ?>" class="w-5 h-5"></i>
-                <span class="font-bold text-sm"><?= $_SESSION['role'] === 'Vice President' ? 'Student Registration' : 'Students' ?></span>
+                <i data-lucide="user-plus" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Student Registration</span>
             </a>
             <a href="manage-users.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
-                <i data-lucide="<?= $_SESSION['role'] === 'Vice President' ? 'users' : 'shield-check' ?>" class="w-5 h-5"></i>
-                <span class="font-black text-sm uppercase tracking-widest"><?= $_SESSION['role'] === 'Vice President' ? 'Teachers Registration' : 'Users' ?></span>
+                <i data-lucide="users" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-black text-sm uppercase tracking-widest">Teachers Registration</span>
             </a>
-            <?php if ($_SESSION['role'] !== 'Vice President'): ?>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['role'] === 'Admin'): ?>
+            <a href="manage-users.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
+                <span class="font-black text-sm uppercase tracking-widest">Users</span>
+            </a>
             <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
-                <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                <i data-lucide="calendar-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Attendance</span>
             </a>
             <?php endif; ?>
+
             <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
-                <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
-                <span class="font-bold text-sm"><?= $_SESSION['role'] === 'Vice President' ? 'Exam & Result' : 'Exam & Results' ?></span>
+                <i data-lucide="file-spreadsheet" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Exam & Results</span>
             </a>
         </nav>
 

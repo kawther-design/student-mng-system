@@ -25,7 +25,7 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Al Huda Admin</title>
+    <title>Admin Dashboard | Al Huda School</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -38,6 +38,7 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
                             blue: '#2D3E8B',
                             teal: '#1DBF92',
                             coral: '#FF6B52',
+                            purple: '#8B5CF6',
                             bg: '#F8FAFF'
                         }
                     },
@@ -49,9 +50,9 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #F8FAFF; }
         .sidebar-item { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sidebar-item.active { 
-            background: linear-gradient(135deg, #2D3E8B 0%, #1a255a 100%);
-            color: white; 
+        .sidebar-item.active, .sidebar-item:hover { 
+            background: linear-gradient(135deg, #2D3E8B 0%, #1a255a 100%) !important;
+            color: white !important; 
             box-shadow: 0 15px 30px -10px rgba(45, 62, 139, 0.4); 
         }
         .stat-card { 
@@ -65,14 +66,13 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
             box-shadow: 0 40px 80px -20px rgba(45, 62, 139, 0.12);
             border-color: rgba(45, 62, 139, 0.1);
         }
-        .mesh-glow {
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(45, 62, 139, 0.03) 0%, transparent 70%);
-            pointer-events: none;
+        .animate-in {
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #2D3E8B; border-radius: 10px; }
@@ -96,20 +96,16 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Dashboard</span>
             </a>
-            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5">
-                <i data-lucide="users" class="w-5 h-5"></i>
-                <span class="font-bold text-sm">Students</span>
-            </a>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5">
-                <i data-lucide="shield-check" class="w-5 h-5"></i>
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+                <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Users</span>
             </a>
-            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5">
-                <i data-lucide="calendar-check" class="w-5 h-5"></i>
+            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+                <i data-lucide="calendar-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Attendance</span>
             </a>
-            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5">
-                <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+                <i data-lucide="file-spreadsheet" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Exam & Results</span>
             </a>
         </nav>
@@ -125,90 +121,116 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
     <main class="flex-1 lg:ml-72 w-full">
         <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-10 h-24 flex items-center justify-between sticky top-0 z-30">
             <div class="flex items-center space-x-4">
-                <div class="lg:hidden w-10 h-10 bg-school-blue/5 rounded-xl flex items-center justify-center text-school-blue mr-2">
-                    <i data-lucide="menu" class="w-5 h-5"></i>
-                </div>
                 <div>
-                    <h2 class="text-2xl font-black text-school-blue tracking-tighter">System Overview</h2>
-                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Administrator Portal & Control</p>
+                    <h2 class="text-2xl font-black text-school-blue tracking-tighter uppercase">Administrator Portal</h2>
+                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Institutional Control Center</p>
                 </div>
             </div>
             <div class="flex items-center space-x-8">
                 <div class="hidden md:flex flex-col items-end">
-                    <p class="text-sm font-black text-school-blue uppercase tracking-widest"><?= $_SESSION['name'] ?></p>
-                    <p class="text-[9px] font-black text-school-teal uppercase tracking-widest mt-1">Primary Administrator</p>
+                    <p class="text-sm font-black text-school-blue uppercase tracking-widest"><?= explode(' ', $_SESSION['name'])[0] ?></p>
+                    <p class="text-[9px] font-black text-school-teal uppercase tracking-widest mt-1">Super Admin</p>
                 </div>
-                <div class="w-14 h-14 rounded-[1.5rem] bg-school-blue/5 p-1 border-2 border-school-blue/10">
+                <div class="w-14 h-14 rounded-[1.5rem] bg-school-blue/5 p-1 border-2 border-school-blue/10 flex items-center justify-center">
                     <img src="https://ui-avatars.com/api/?name=Admin&background=2D3E8B&color=fff" class="w-full h-full rounded-[1.2rem] shadow-lg" alt="">
                 </div>
             </div>
         </header>
 
-        <div class="p-10">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                <div class="stat-card p-10 rounded-[4rem] relative overflow-hidden group">
-                    <div class="mesh-glow"></div>
-                    <div class="p-4 bg-school-teal/10 text-school-teal w-fit rounded-2xl mb-8 group-hover:scale-110 transition-transform duration-500"><i data-lucide="layout" class="w-7 h-7"></i></div>
-                    <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em]">Active Forms</h4>
-                    <p class="text-4xl font-black text-school-blue mt-2"><?= $activeSections ?> <span class="text-lg text-gray-300 ml-1">Classes</span></p>
+        <div class="p-10 animate-in">
+            <div class="mb-10 flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-black text-school-blue tracking-tighter">System Analytics</h3>
+                    <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Institutional data overview for academic year 2026</p>
                 </div>
-                <div class="stat-card p-10 rounded-[4rem] relative overflow-hidden group">
-                    <div class="mesh-glow"></div>
-                    <div class="p-4 bg-school-purple/10 text-school-purple w-fit rounded-2xl mb-8 group-hover:scale-110 transition-transform duration-500"><i data-lucide="shield" class="w-7 h-7"></i></div>
-                    <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em]">Total Staff</h4>
-                    <p class="text-4xl font-black text-school-blue mt-2"><?= $totalTeachers ?> <span class="text-lg text-gray-300 ml-1">Users</span></p>
-                </div>
-                <div class="stat-card bg-school-blue p-10 rounded-[4rem] relative overflow-hidden group border-none shadow-2xl shadow-school-blue/30 text-white">
-                    <div class="p-4 bg-white/10 text-white w-fit rounded-2xl mb-8 group-hover:scale-110 transition-transform duration-500"><i data-lucide="users" class="w-7 h-7"></i></div>
-                    <h4 class="text-white/40 font-black text-[10px] uppercase tracking-[0.3em]">Students</h4>
-                    <p class="text-5xl font-black text-white mt-2 tracking-tighter"><?= $totalStudents ?></p>
-                </div>
-                <div class="stat-card p-10 rounded-[4rem] relative overflow-hidden group">
-                    <div class="mesh-glow"></div>
-                    <div class="p-4 bg-school-yellow/10 text-school-yellow w-fit rounded-2xl mb-8 group-hover:scale-110 transition-transform duration-500"><i data-lucide="activity" class="w-7 h-7"></i></div>
-                    <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em]">System Health</h4>
-                    <p class="text-4xl font-black text-school-blue mt-2">100<span class="text-lg text-gray-300 ml-1">%</span></p>
+                <div class="px-6 py-3 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center space-x-3">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">System Online</span>
                 </div>
             </div>
 
-            <div class="bg-white rounded-[4rem] p-12 shadow-2xl shadow-school-blue/5 border border-gray-50 relative overflow-hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div class="stat-card p-10 rounded-[3.5rem] relative overflow-hidden group">
+                    <div class="p-4 bg-school-teal/10 text-school-teal w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-school-teal/10">
+                        <i data-lucide="layout" class="w-7 h-7"></i>
+                    </div>
+                    <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em]">Active Classes</h4>
+                    <p class="text-5xl font-black text-school-blue mt-2 tracking-tighter"><?= $activeSections ?> <span class="text-sm text-gray-300 font-bold uppercase ml-1">Forms</span></p>
+                    <i data-lucide="layout" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-teal/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
+                </div>
+
+                <div class="stat-card p-10 rounded-[3.5rem] relative overflow-hidden group">
+                    <div class="p-4 bg-school-purple/10 text-school-purple w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-school-purple/10">
+                        <i data-lucide="shield" class="w-7 h-7"></i>
+                    </div>
+                    <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em]">Total Staff</h4>
+                    <p class="text-5xl font-black text-school-blue mt-2 tracking-tighter"><?= $totalTeachers ?> <span class="text-sm text-gray-300 font-bold uppercase ml-1">Users</span></p>
+                    <i data-lucide="shield" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-purple/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
+                </div>
+
+                <div class="stat-card bg-school-blue p-10 rounded-[3.5rem] relative overflow-hidden group border-none shadow-2xl shadow-school-blue/30 text-white">
+                    <div class="p-4 bg-white/10 text-white w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-black/10">
+                        <i data-lucide="users" class="w-7 h-7"></i>
+                    </div>
+                    <h4 class="text-white/40 font-black text-[10px] uppercase tracking-[0.3em]">Student Body</h4>
+                    <p class="text-6xl font-black text-white mt-2 tracking-tighter"><?= $totalStudents ?></p>
+                    <i data-lucide="users" class="absolute -bottom-10 -right-10 w-48 h-48 text-white/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
+                </div>
+
+                <div class="stat-card p-10 rounded-[3.5rem] relative overflow-hidden group">
+                    <div class="p-4 bg-school-coral/10 text-school-coral w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-school-coral/10">
+                        <i data-lucide="activity" class="w-7 h-7"></i>
+                    </div>
+                    <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em]">Academic Perf.</h4>
+                    <p class="text-5xl font-black text-school-blue mt-2 tracking-tighter">94<span class="text-xl text-gray-300 ml-1">%</span></p>
+                    <i data-lucide="activity" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-coral/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[4rem] p-12 shadow-2xl shadow-school-blue/5 border border-gray-100 relative overflow-hidden">
                 <div class="flex items-center justify-between mb-12">
                     <div>
-                        <h3 class="text-3xl font-black text-school-blue tracking-tighter">Recent Student Activity</h3>
-                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Latest additions to the academic record</p>
+                        <h3 class="text-2xl font-black text-school-blue tracking-tighter uppercase">Recent Enrollments</h3>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Latest additions to the academic repository</p>
                     </div>
-                    <a href="manage-students.php" class="px-8 py-4 bg-school-blue text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-school-blue/20 hover:scale-105 transition-all">View All Students</a>
+                    <a href="manage-students.php" class="px-8 py-4 bg-school-blue text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-school-blue/20 hover:scale-105 transition-all flex items-center space-x-3">
+                        <span>Directory</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
                 </div>
                 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead>
-                            <tr class="text-[11px] font-black text-gray-300 uppercase tracking-[0.3em] border-b border-gray-100">
-                                <th class="pb-8 pl-4">Full Student Name</th>
+                            <tr class="text-[11px] font-black text-gray-300 uppercase tracking-[0.3em] border-b border-gray-50">
+                                <th class="pb-8 pl-4">Student Profile</th>
                                 <th class="pb-8">Academic Level</th>
                                 <th class="pb-8">Resident Area</th>
-                                <th class="pb-8 text-right pr-4">Student ID</th>
+                                <th class="pb-8 text-right pr-4">Record ID</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
                             <?php foreach ($recentStudents as $s): ?>
-                            <tr class="group hover:bg-school-blue/[0.02] transition-all cursor-pointer">
+                            <tr class="group hover:bg-school-blue/[0.03] transition-all cursor-pointer">
                                 <td class="py-8 pl-4">
                                     <div class="flex items-center space-x-4">
-                                        <div class="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-school-blue group-hover:bg-school-blue group-hover:text-white transition-all">
-                                            <i data-lucide="user" class="w-4 h-4"></i>
+                                        <div class="w-12 h-12 rounded-2xl bg-school-blue/5 border border-school-blue/5 flex items-center justify-center text-school-blue group-hover:bg-school-blue group-hover:text-white group-hover:scale-110 transition-all duration-500 overflow-hidden">
+                                            <img src="https://ui-avatars.com/api/?name=<?= urlencode($s->name) ?>&background=2D3E8B&color=fff" class="w-full h-full object-cover" alt="">
                                         </div>
-                                        <span class="font-black text-school-blue text-lg group-hover:translate-x-2 transition-transform"><?= htmlspecialchars($s->name) ?></span>
+                                        <div>
+                                            <span class="font-black text-school-blue text-lg group-hover:translate-x-2 transition-transform block"><?= htmlspecialchars($s->name) ?></span>
+                                            <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest"><?= htmlspecialchars($s->student_phone ?? 'NO PHONE') ?></span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="py-8">
-                                    <span class="px-4 py-1.5 bg-school-teal/10 text-school-teal text-[10px] font-black uppercase tracking-widest rounded-full"><?= htmlspecialchars($s->form ?? 'N/A') ?></span>
+                                    <span class="px-4 py-2 bg-school-teal/10 text-school-teal text-[10px] font-black uppercase tracking-widest rounded-xl border border-school-teal/5"><?= htmlspecialchars($s->form ?? 'N/A') ?></span>
                                 </td>
                                 <td class="py-8">
-                                    <span class="px-4 py-1.5 bg-school-purple/10 text-school-purple text-[10px] font-black uppercase tracking-widest rounded-full"><?= htmlspecialchars($s->neighborhood ?? 'N/A') ?></span>
+                                    <span class="px-4 py-2 bg-school-purple/10 text-school-purple text-[10px] font-black uppercase tracking-widest rounded-xl border border-school-purple/5"><?= htmlspecialchars($s->neighborhood ?? 'N/A') ?></span>
                                 </td>
                                 <td class="py-8 text-right pr-4">
-                                    <span class="text-sm font-black text-gray-400 group-hover:text-school-blue">#<?= $s->student_id ?></span>
+                                    <span class="text-sm font-black text-school-blue italic opacity-40 group-hover:opacity-100 transition-opacity">#<?= $s->student_id ?></span>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

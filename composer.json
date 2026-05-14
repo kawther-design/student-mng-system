@@ -1,5 +1,6 @@
 {
     "require": {
-        "mongodb/mongodb": "1.11.0"
+        "mongodb/mongodb": "1.11.0",
+        "shuchkin/simplexlsx": "^1.1"
     }
 }
