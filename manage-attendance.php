@@ -169,17 +169,13 @@ if ($_SESSION['role'] === 'Teacher') {
             <?php endif; ?>
 
             <?php if ($_SESSION['role'] === 'Teacher'): ?>
-            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
-                <i data-lucide="users" class="w-5 h-5"></i>
-                <span class="font-bold text-sm">Students</span>
-            </a>
             <a href="manage-attendance.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
                 <i data-lucide="calendar-check" class="w-5 h-5"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Attendance</span>
             </a>
             <?php endif; ?>
 
-            <?php if ($_SESSION['role'] !== 'Teacher' && $_SESSION['role'] !== 'Vice President'): ?>
+            <?php if ($_SESSION['role'] !== 'Teacher' && $_SESSION['role'] !== 'Vice President' && $_SESSION['role'] !== 'Teacher'): ?>
             <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Exam & Results</span>

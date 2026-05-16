@@ -2,8 +2,8 @@
 session_start();
 require_once 'db_config.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'Teacher') {
+    header('Location: ' . ($_SESSION['role'] === 'Teacher' ? 'teacher-dashboard.php' : 'login.php'));
     exit;
 }
 
@@ -112,7 +112,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Get recent exams for the list
 $recentExams = $examsColl->find([], ['limit' => 10, 'sort' => ['created_at' => -1]])->toArray();
 
-$accentColor = '#1DBF92'; // VP Teal
+// Determine Dashboard URL and Accent Color based on role
+$dashboardUrl = 'admin-dashboard.php';
+$accentColor = '#2D3E8B'; // Default Blue for Admin
+if ($_SESSION['role'] === 'Teacher') {
+    $dashboardUrl = 'teacher-dashboard.php';
+    $accentColor = '#8B5CF6'; // Purple for Teacher
+} elseif ($_SESSION['role'] === 'Parent') {
+    $dashboardUrl = 'parent-dashboard.php';
+    $accentColor = '#F97316'; // Orange for Parent
+} elseif ($_SESSION['role'] === 'Vice President') {
+    $dashboardUrl = 'vice-president-dashboard.php';
+    $accentColor = '#1DBF92'; // Teal for VP
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -129,6 +141,7 @@ $accentColor = '#1DBF92'; // VP Teal
                 extend: {
                     colors: {
                         school: {
+                            accent: '<?= $accentColor ?>',
                             blue: '#2D3E8B',
                             teal: '#1DBF92',
                             bg: '#F8FAFF'
@@ -142,38 +155,53 @@ $accentColor = '#1DBF92'; // VP Teal
     <style>
         .sidebar-item { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .sidebar-item.active, .sidebar-item:hover { 
-            background: linear-gradient(135deg, #1DBF92 0%, #065F46 100%) !important;
+            background: linear-gradient(135deg, <?= $accentColor ?> 0%, #1a255a 100%) !important;
             color: white !important; 
-            box-shadow: 0 15px 30px -10px rgba(29, 191, 146, 0.4); 
+            box-shadow: 0 15px 30px -10px <?= $accentColor ?>66; 
         }
     </style>
 </head>
 <body class="bg-school-bg text-gray-800 flex min-h-screen">
 
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8">
+    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-accent/5">
         <div class="flex items-center space-x-4 mb-16">
-            <div class="w-12 h-12 bg-school-teal rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-teal/20">
+            <div class="w-12 h-12 bg-school-accent rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-accent/20">
                 <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-black text-school-teal tracking-tighter uppercase">Al Huda</h1>
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">Management</p>
+                <h1 class="text-2xl font-black text-school-accent tracking-tighter uppercase">Al Huda</h1>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">Management v2.0</p>
             </div>
         </div>
         
         <nav class="flex-1 space-y-3">
-            <a href="vice-president-dashboard.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-teal hover:bg-school-teal/5 transition-all">
+            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
-            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-teal hover:bg-school-teal/5 transition-all">
+            
+            <?php if ($_SESSION['role'] === 'Vice President'): ?>
+            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="user-plus" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Student Registration</span>
             </a>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-teal hover:bg-school-teal/5 transition-all">
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="users" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Teachers Registration</span>
             </a>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['role'] === 'Admin'): ?>
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+                <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Users</span>
+            </a>
+            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+                <i data-lucide="calendar-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Attendance</span>
+            </a>
+            <?php endif; ?>
+
             <a href="manage-exams.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Exam & Results</span>

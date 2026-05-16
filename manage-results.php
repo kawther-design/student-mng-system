@@ -2,8 +2,8 @@
 session_start();
 require_once 'db_config.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'Teacher') {
+    header('Location: ' . ($_SESSION['role'] === 'Teacher' ? 'teacher-dashboard.php' : 'login.php'));
     exit;
 }
 
@@ -166,7 +166,19 @@ if ($currentClass && !empty($students)) {
     });
 }
 
-$accentColor = '#1DBF92'; // Vice President Teal
+// Determine Dashboard URL and Accent Color based on role
+$dashboardUrl = 'admin-dashboard.php';
+$accentColor = '#2D3E8B'; // Default Blue for Admin
+if ($_SESSION['role'] === 'Teacher') {
+    $dashboardUrl = 'teacher-dashboard.php';
+    $accentColor = '#8B5CF6'; // Purple for Teacher
+} elseif ($_SESSION['role'] === 'Parent') {
+    $dashboardUrl = 'parent-dashboard.php';
+    $accentColor = '#F97316'; // Orange for Parent
+} elseif ($_SESSION['role'] === 'Vice President') {
+    $dashboardUrl = 'vice-president-dashboard.php';
+    $accentColor = '#1DBF92'; // Teal for VP
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -183,6 +195,7 @@ $accentColor = '#1DBF92'; // Vice President Teal
                 extend: {
                     colors: {
                         school: {
+                            accent: '<?= $accentColor ?>',
                             blue: '#2D3E8B',
                             teal: '#1DBF92',
                             coral: '#FF6B52',
@@ -202,45 +215,60 @@ $accentColor = '#1DBF92'; // Vice President Teal
             transition: all 0.3s ease;
         }
         .glass-input:focus {
-            border-color: #1DBF92;
+            border-color: <?= $accentColor ?>;
             background: white;
-            box-shadow: 0 10px 25px -5px rgba(29, 191, 146, 0.1);
+            box-shadow: 0 10px 25px -5px <?= $accentColor ?>1a;
         }
         .sidebar-item { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .sidebar-item.active, .sidebar-item:hover { 
-            background: linear-gradient(135deg, #1DBF92 0%, #065F46 100%) !important;
+            background: linear-gradient(135deg, <?= $accentColor ?> 0%, #1a255a 100%) !important;
             color: white !important; 
-            box-shadow: 0 15px 30px -10px rgba(29, 191, 146, 0.4); 
+            box-shadow: 0 15px 30px -10px <?= $accentColor ?>66; 
         }
     </style>
 </head>
 <body class="text-gray-800 flex min-h-screen">
 
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-teal/5">
+    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-accent/5">
         <div class="flex items-center space-x-4 mb-16">
-            <div class="w-12 h-12 bg-school-teal rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-teal/20">
-                <i data-lucide="shield" class="text-white w-7 h-7"></i>
+            <div class="w-12 h-12 bg-school-accent rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-accent/20">
+                <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-black text-school-teal tracking-tighter">AL HUDA</h1>
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">VP PORTAL v2.0</p>
+                <h1 class="text-2xl font-black text-school-accent tracking-tighter uppercase">AL HUDA</h1>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">Management v2.0</p>
             </div>
         </div>
         
         <nav class="flex-1 space-y-3">
-            <a href="vice-president-dashboard.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-teal hover:bg-school-teal/5 transition-all">
+            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
-            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-teal hover:bg-school-teal/5 transition-all">
+            
+            <?php if ($_SESSION['role'] === 'Vice President'): ?>
+            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="user-plus" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Student Registration</span>
             </a>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-teal hover:bg-school-teal/5 transition-all">
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="users" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Teachers Registration</span>
             </a>
-            <a href="manage-exams.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem] bg-school-teal text-white shadow-lg shadow-school-teal/20">
+            <?php endif; ?>
+
+            <?php if ($_SESSION['role'] === 'Admin'): ?>
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+                <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Users</span>
+            </a>
+            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+                <i data-lucide="calendar-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Attendance</span>
+            </a>
+            <?php endif; ?>
+
+            <a href="manage-exams.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem] bg-school-accent text-white shadow-lg shadow-school-accent/20">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Exam & Results</span>
             </a>
@@ -257,7 +285,7 @@ $accentColor = '#1DBF92'; // Vice President Teal
     <main class="flex-1 lg:ml-72 w-full">
         <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-10 h-24 flex items-center justify-between sticky top-0 z-30">
             <div class="flex items-center space-x-6">
-                <a href="manage-exams.php" class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 hover:bg-school-teal hover:text-white transition-all"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
+                <a href="manage-exams.php" class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 hover:bg-school-accent hover:text-white transition-all"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
                 <div>
                     <h2 class="text-2xl font-black text-school-blue tracking-tighter uppercase"><?= $exam ? htmlspecialchars($exam->name) : 'Academic Results' ?> Control</h2>
                     <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Manual Entry & Bulk Excel Import</p>
@@ -268,7 +296,7 @@ $accentColor = '#1DBF92'; // Vice President Teal
             <div class="flex items-center space-x-4">
                 <form method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
                     <input type="hidden" name="action" value="import_csv">
-                    <label class="bg-school-teal px-6 py-4 rounded-2xl flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white cursor-pointer hover:scale-105 shadow-lg shadow-school-teal/20 transition-all">
+                    <label class="bg-school-accent px-6 py-4 rounded-2xl flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white cursor-pointer hover:scale-105 shadow-lg shadow-school-accent/20 transition-all">
                         <i data-lucide="file-up" class="w-4 h-4"></i>
                         <span>Import Excel (CSV)</span>
                         <input type="file" name="csv_file" class="hidden" onchange="this.form.submit()">
@@ -295,7 +323,7 @@ $accentColor = '#1DBF92'; // Vice President Teal
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Step 2: Filter by Class</p>
                         <div class="flex flex-wrap gap-3">
                             <?php foreach ($allClasses as $class): ?>
-                            <a href="?exam_id=<?= $examId ?>&class=<?= urlencode($class) ?>" class="px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all <?= $currentClass === $class ? 'bg-school-teal text-white shadow-lg shadow-school-teal/30' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 border border-gray-100' ?>">
+                            <a href="?exam_id=<?= $examId ?>&class=<?= urlencode($class) ?>" class="px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all <?= $currentClass === $class ? 'bg-school-accent text-white shadow-lg shadow-school-accent/30' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 border border-gray-100' ?>">
                                 <?= htmlspecialchars($class) ?>
                             </a>
                             <?php endforeach; ?>
@@ -333,7 +361,7 @@ $accentColor = '#1DBF92'; // Vice President Teal
                                 <?php foreach ($subjects as $label): ?>
                                 <th class="pb-8 px-4 text-center font-black"><?= $label ?></th>
                                 <?php endforeach; ?>
-                                <th class="pb-8 px-6 text-center text-school-teal">Total / 1000</th>
+                                <th class="pb-8 px-6 text-center text-school-accent">Total / 1000</th>
                                 <th class="pb-8 px-6 text-center text-school-coral">% Score</th>
                                 <th class="pb-8 px-6 text-center">Actions</th>
                             </tr>
@@ -355,7 +383,7 @@ $accentColor = '#1DBF92'; // Vice President Teal
                                 </td>
                                 <?php endforeach; ?>
                                 <td class="py-6 px-2 text-center">
-                                    <span class="text-sm font-black text-school-teal"><?= $resObj->total_marks ?? 0 ?></span>
+                                    <span class="text-sm font-black text-school-accent"><?= $resObj->total_marks ?? 0 ?></span>
                                 </td>
                                 <td class="py-6 px-2 text-center">
                                     <span class="text-sm font-black text-school-coral"><?= isset($resObj->total_marks) ? number_format($resObj->total_marks / 10, 1) : '0' ?>%</span>
