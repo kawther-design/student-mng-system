@@ -218,7 +218,7 @@ if ($_SESSION['role'] === 'Teacher') {
 
     <main class="flex-1 lg:ml-72 w-full p-10">
         <header class="mb-12">
-            <h2 class="text-4xl font-black text-school-blue tracking-tighter uppercase">Results Center</h2>
+            <h2 class="text-4xl font-black text-school-accent tracking-tighter uppercase">Results Center</h2>
             <p class="text-xs text-gray-400 font-black uppercase tracking-[0.3em] mt-1">Direct Excel Import Portal</p>
         </header>
 
@@ -238,28 +238,28 @@ if ($_SESSION['role'] === 'Teacher') {
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <!-- Upload Section -->
-            <div class="bg-white rounded-[4rem] p-12 shadow-2xl shadow-school-blue/5 border border-gray-50">
-                <h3 class="text-2xl font-black text-school-blue uppercase tracking-tighter mb-8">New Results Upload</h3>
+            <div class="bg-white rounded-[4rem] p-12 shadow-2xl shadow-school-accent/5 border border-gray-50">
+                <h3 class="text-2xl font-black text-school-accent uppercase tracking-tighter mb-8">New Results Upload</h3>
                 <form method="POST" enctype="multipart/form-data" class="space-y-8">
                     <input type="hidden" name="action" value="upload_results">
                     
                     <div class="space-y-4">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Examination Title</label>
-                        <input type="text" name="exam_title" required placeholder="e.g. Final Exam 2026" class="w-full bg-gray-50 border-2 border-transparent focus:border-school-teal/20 focus:bg-white rounded-[2rem] py-6 px-10 outline-none text-sm font-black text-school-blue transition-all uppercase">
+                        <input type="text" name="exam_title" required placeholder="e.g. Final Exam 2026" class="w-full bg-gray-50 border-2 border-transparent focus:border-school-accent/20 focus:bg-white rounded-[2rem] py-6 px-10 outline-none text-sm font-black text-school-accent transition-all uppercase">
                     </div>
 
                     <div class="space-y-4">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Select Results File (Excel/CSV)</label>
                         <div class="relative group">
                             <input type="file" name="results_file" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                            <div class="w-full bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] py-12 px-10 text-center group-hover:border-school-teal/30 group-hover:bg-school-teal/[0.02] transition-all">
-                                <i data-lucide="file-up" class="w-12 h-12 mx-auto mb-4 text-gray-300 group-hover:text-school-teal transition-all"></i>
+                            <div class="w-full bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] py-12 px-10 text-center group-hover:border-school-accent/30 group-hover:bg-school-accent/[0.02] transition-all">
+                                <i data-lucide="file-up" class="w-12 h-12 mx-auto mb-4 text-gray-300 group-hover:text-school-accent transition-all"></i>
                                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Click to browse or drag & drop</p>
                             </div>
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full py-7 bg-school-blue text-white rounded-[2.5rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-school-blue/20 hover:scale-[1.02] active:scale-95 transition-all">
+                    <button type="submit" class="w-full py-7 bg-school-accent text-white rounded-[2.5rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-school-accent/20 hover:scale-[1.02] active:scale-95 transition-all">
                         Process & Import Results
                     </button>
                 </form>
@@ -273,8 +273,8 @@ if ($_SESSION['role'] === 'Teacher') {
             </div>
 
             <!-- Recent Results -->
-            <div class="bg-white rounded-[4rem] p-12 shadow-2xl shadow-school-blue/5 border border-gray-50">
-                <h3 class="text-2xl font-black text-school-blue uppercase tracking-tighter mb-8">Recent Uploads</h3>
+            <div class="bg-white rounded-[4rem] p-12 shadow-2xl shadow-school-accent/5 border border-gray-50">
+                <h3 class="text-2xl font-black text-school-accent uppercase tracking-tighter mb-8">Recent Uploads</h3>
                 <div class="space-y-6">
                     <?php if (empty($recentExams)): ?>
                         <div class="text-center py-20 opacity-20">
@@ -285,15 +285,15 @@ if ($_SESSION['role'] === 'Teacher') {
                     <?php foreach ($recentExams as $re): ?>
                         <div class="flex items-center justify-between p-6 bg-gray-50/50 rounded-[2rem] border border-gray-50 hover:bg-white hover:shadow-xl transition-all duration-500 group">
                             <div class="flex items-center space-x-6">
-                                <div class="w-12 h-12 bg-school-teal/10 text-school-teal rounded-2xl flex items-center justify-center">
+                                <div class="w-12 h-12 bg-school-accent/10 text-school-accent rounded-2xl flex items-center justify-center">
                                     <i data-lucide="check-square" class="w-6 h-6"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-black text-school-blue uppercase tracking-tight"><?= htmlspecialchars($re->name) ?></h4>
+                                    <h4 class="font-black text-school-accent uppercase tracking-tight"><?= htmlspecialchars($re->name) ?></h4>
                                     <p class="text-[9px] text-gray-400 font-bold uppercase mt-0.5"><?= date('M d, Y', $re->created_at->toDateTime()->getTimestamp()) ?></p>
                                 </div>
                             </div>
-                            <a href="manage-results.php?exam_id=<?= $re->_id ?>" class="px-5 py-3 bg-white text-school-teal rounded-xl text-[8px] font-black uppercase tracking-widest border border-school-teal/10 hover:bg-school-teal hover:text-white transition-all opacity-0 group-hover:opacity-100">View Details</a>
+                            <a href="manage-results.php?exam_id=<?= $re->_id ?>" class="px-5 py-3 bg-white text-school-accent rounded-xl text-[8px] font-black uppercase tracking-widest border border-school-accent/10 hover:bg-school-accent hover:text-white transition-all opacity-0 group-hover:opacity-100">View Details</a>
                         </div>
                     <?php endforeach; ?>
                 </div>

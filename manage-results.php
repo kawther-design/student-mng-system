@@ -287,7 +287,7 @@ if ($_SESSION['role'] === 'Teacher') {
             <div class="flex items-center space-x-6">
                 <a href="manage-exams.php" class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 hover:bg-school-accent hover:text-white transition-all"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
                 <div>
-                    <h2 class="text-2xl font-black text-school-blue tracking-tighter uppercase"><?= $exam ? htmlspecialchars($exam->name) : 'Academic Results' ?> Control</h2>
+                    <h2 class="text-2xl font-black text-school-accent tracking-tighter uppercase"><?= $exam ? htmlspecialchars($exam->name) : 'Academic Results' ?> Control</h2>
                     <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Manual Entry & Bulk Excel Import</p>
                 </div>
             </div>
@@ -307,11 +307,11 @@ if ($_SESSION['role'] === 'Teacher') {
         </header>
 
         <div class="p-10">
-            <div class="bg-white rounded-[4rem] p-10 shadow-xl shadow-school-blue/5 border border-gray-50 mb-10">
+            <div class="bg-white rounded-[4rem] p-10 shadow-xl shadow-school-accent/5 border border-gray-50 mb-10">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div>
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Step 1: Select Examination Cycle</p>
-                        <select onchange="location.href='?exam_id='+this.value" class="w-full bg-gray-50 border-none rounded-2xl py-5 px-8 text-sm font-black text-school-blue uppercase tracking-tighter outline-none cursor-pointer hover:bg-gray-100 transition-all">
+                        <select onchange="location.href='?exam_id='+this.value" class="w-full bg-gray-50 border-none rounded-2xl py-5 px-8 text-sm font-black text-school-accent uppercase tracking-tighter outline-none cursor-pointer hover:bg-gray-100 transition-all">
                             <option value="">-- Choose Exam --</option>
                             <?php foreach ($allExams as $e): ?>
                             <option value="<?= $e->_id ?>" <?= $examId == (string)$e->_id ? 'selected' : '' ?>><?= htmlspecialchars($e->name) ?> (<?= htmlspecialchars($e->type) ?>)</option>
@@ -343,17 +343,17 @@ if ($_SESSION['role'] === 'Teacher') {
             <?php if (!$exam): ?>
                 <div class="text-center py-32 bg-white rounded-[4rem] border-2 border-dashed border-gray-100">
                     <i data-lucide="file-spreadsheet" class="w-20 h-20 mx-auto mb-6 opacity-20"></i>
-                    <h3 class="text-2xl font-black uppercase tracking-widest text-school-blue opacity-30">Please select an exam cycle to manage results</h3>
+                    <h3 class="text-2xl font-black uppercase tracking-widest text-school-accent opacity-30">Please select an exam cycle to manage results</h3>
                 </div>
             <?php elseif (!$currentClass): ?>
                 <div class="text-center py-32 bg-white rounded-[4rem] border-2 border-dashed border-gray-100">
                     <i data-lucide="users" class="w-20 h-20 mx-auto mb-6 opacity-20"></i>
-                    <h3 class="text-2xl font-black uppercase tracking-widest text-school-blue opacity-30">Select a class to enter marks</h3>
+                    <h3 class="text-2xl font-black uppercase tracking-widest text-school-accent opacity-30">Select a class to enter marks</h3>
                 </div>
             <?php else: ?>
             <form method="POST" class="space-y-10">
                 <input type="hidden" name="action" value="save_results">
-                <div class="bg-white rounded-[4rem] p-10 shadow-xl shadow-school-blue/5 border border-gray-50 overflow-x-auto">
+                <div class="bg-white rounded-[4rem] p-10 shadow-xl shadow-school-accent/5 border border-gray-50 overflow-x-auto">
                     <table class="w-full text-left min-w-[1200px]">
                         <thead>
                             <tr class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] border-b border-gray-50">
@@ -374,12 +374,12 @@ if ($_SESSION['role'] === 'Teacher') {
                             ?>
                             <tr class="group hover:bg-gray-50/50 transition-all">
                                 <td class="py-6">
-                                    <h4 class="text-sm font-black text-school-blue uppercase tracking-tighter"><?= htmlspecialchars($student->name) ?></h4>
+                                    <h4 class="text-sm font-black text-school-accent uppercase tracking-tighter"><?= htmlspecialchars($student->name) ?></h4>
                                     <p class="text-[9px] text-gray-400 font-bold uppercase mt-0.5 italic">ID: <?= htmlspecialchars($student->student_id) ?></p>
                                 </td>
                                 <?php foreach ($subjects as $key => $label): ?>
                                 <td class="py-6 px-2 text-center">
-                                    <input type="number" name="marks[<?= $s_id ?>][<?= $key ?>]" value="<?= htmlspecialchars($marks[$key] ?? '') ?>" step="0.5" min="0" max="100" class="w-16 h-12 glass-input rounded-xl text-center text-sm font-black text-school-blue outline-none" placeholder="0">
+                                    <input type="number" name="marks[<?= $s_id ?>][<?= $key ?>]" value="<?= htmlspecialchars($marks[$key] ?? '') ?>" step="0.5" min="0" max="100" class="w-16 h-12 glass-input rounded-xl text-center text-sm font-black text-school-accent outline-none" placeholder="0">
                                 </td>
                                 <?php endforeach; ?>
                                 <td class="py-6 px-2 text-center">
@@ -404,7 +404,7 @@ if ($_SESSION['role'] === 'Teacher') {
                 </div>
 
                 <div class="flex justify-center">
-                    <button type="submit" class="bg-school-blue px-16 py-6 rounded-[2.5rem] text-white font-black text-xs uppercase tracking-widest shadow-2xl shadow-school-blue/20 hover:scale-105 active:scale-95 transition-all">
+                    <button type="submit" class="bg-school-accent px-16 py-6 rounded-[2.5rem] text-white font-black text-xs uppercase tracking-widest shadow-2xl shadow-school-accent/20 hover:scale-105 active:scale-95 transition-all">
                         Save Academic Results
                     </button>
                 </div>
