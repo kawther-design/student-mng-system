@@ -173,6 +173,14 @@ if ($_SESSION['role'] === 'Teacher') {
         }
         .filter-group { position: relative; }
         .filter-group:hover .filter-dropdown { display: block; animation: slideDown 0.2s ease-out; }
+        .filter-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -0.5rem;
+            left: 0;
+            right: 0;
+            height: 0.5rem;
+        }
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -202,7 +210,7 @@ if ($_SESSION['role'] === 'Teacher') {
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Student Phone Number</label>
-                        <input type="text" name="student_phone" required placeholder="e.g. 061XXXXXXX" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
+                        <input type="text" name="student_phone" required placeholder="e.g. 063XXXXXXX" pattern="063[0-9]{7}" title="Phone number must start with 063 followed by 7 digits" maxlength="10" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
                     </div>
                 </div>
 
@@ -251,7 +259,7 @@ if ($_SESSION['role'] === 'Teacher') {
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Parent Phone</label>
-                        <input type="text" name="parent_phone" required placeholder="e.g. 061XXXXXXX" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
+                        <input type="text" name="parent_phone" required placeholder="e.g. 063XXXXXXX" pattern="063[0-9]{7}" title="Phone number must start with 063 followed by 7 digits" maxlength="10" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
                     </div>
                 </div>
 
@@ -278,7 +286,7 @@ if ($_SESSION['role'] === 'Teacher') {
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Student Phone Number</label>
-                        <input type="text" name="student_phone" id="edit-student-phone" required class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
+                        <input type="text" name="student_phone" id="edit-student-phone" required placeholder="e.g. 063XXXXXXX" pattern="063[0-9]{7}" title="Phone number must start with 063 followed by 7 digits" maxlength="10" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
                     </div>
                 </div>
 
@@ -327,7 +335,7 @@ if ($_SESSION['role'] === 'Teacher') {
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Parent Phone</label>
-                        <input type="text" name="parent_phone" id="edit-parent-phone" required class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
+                        <input type="text" name="parent_phone" id="edit-parent-phone" required placeholder="e.g. 063XXXXXXX" pattern="063[0-9]{7}" title="Phone number must start with 063 followed by 7 digits" maxlength="10" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5">
                     </div>
                 </div>
 

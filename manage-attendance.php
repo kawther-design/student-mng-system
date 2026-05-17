@@ -56,6 +56,22 @@ foreach ($existingAtt as $record) {
     $attStatus[$record->student_id] = $record->status;
 }
 
+// Fetch history if requested
+$historyRecords = [];
+$historyStudent = null;
+$historyStats = ['Present' => 0, 'Absent' => 0, 'Late' => 0];
+if (isset($_GET['history_id'])) {
+    $historyStudent = $studentColl->findOne(['_id' => new MongoDB\BSON\ObjectId($_GET['history_id'])]);
+    if ($historyStudent) {
+        $historyRecords = $attColl->find(['student_id' => (string)$historyStudent->_id], ['sort' => ['date' => -1]])->toArray();
+        foreach ($historyRecords as $hr) {
+            if (isset($historyStats[$hr->status])) {
+                $historyStats[$hr->status]++;
+            }
+        }
+    }
+}
+
 // Determine Dashboard URL and Accent Color based on role
 $dashboardUrl = 'admin-dashboard.php';
 $accentColor = '#2D3E8B'; // Default Blue for Admin
@@ -132,6 +148,58 @@ if ($_SESSION['role'] === 'Teacher') {
     </style>
 </head>
 <body class="text-gray-800 flex min-h-screen">
+
+    <?php if ($historyStudent): ?>
+    <div id="historyModal" class="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-school-blue/20 backdrop-blur-md">
+        <div class="bg-white w-full max-w-3xl rounded-[4rem] p-12 lg:p-16 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="location.href='manage-attendance.php?form=<?= urlencode($form) ?>&date=<?= $date ?>'" class="absolute top-10 right-10 text-gray-400 hover:text-school-coral transition-all"><i data-lucide="x" class="w-8 h-8"></i></button>
+            <h3 class="text-3xl font-black text-school-accent mb-2 tracking-tighter uppercase">Attendance History</h3>
+            <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mb-8"><?= htmlspecialchars($historyStudent->name) ?></p>
+
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <div class="bg-green-50 p-6 rounded-3xl text-center">
+                    <p class="text-2xl font-black text-green-500"><?= $historyStats['Present'] ?></p>
+                    <p class="text-[9px] font-black text-green-600/50 uppercase tracking-widest mt-1">Present</p>
+                </div>
+                <div class="bg-red-50 p-6 rounded-3xl text-center">
+                    <p class="text-2xl font-black text-red-500"><?= $historyStats['Absent'] ?></p>
+                    <p class="text-[9px] font-black text-red-600/50 uppercase tracking-widest mt-1">Absent</p>
+                </div>
+                <div class="bg-orange-50 p-6 rounded-3xl text-center">
+                    <p class="text-2xl font-black text-orange-500"><?= $historyStats['Late'] ?></p>
+                    <p class="text-[9px] font-black text-orange-600/50 uppercase tracking-widest mt-1">Late</p>
+                </div>
+            </div>
+
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] border-b border-gray-50">
+                        <th class="pb-4">Date</th>
+                        <th class="pb-4">Status</th>
+                        <th class="pb-4 text-right">Marked By</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    <?php if (empty($historyRecords)): ?>
+                    <tr><td colspan="3" class="py-8 text-center text-gray-400 text-sm font-bold">No records found</td></tr>
+                    <?php endif; ?>
+                    <?php foreach ($historyRecords as $record): ?>
+                    <tr>
+                        <td class="py-4 text-sm font-bold text-school-accent"><?= htmlspecialchars($record->date) ?></td>
+                        <td class="py-4">
+                            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest 
+                                <?= $record->status === 'Present' ? 'bg-green-100 text-green-600' : ($record->status === 'Absent' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600') ?>">
+                                <?= htmlspecialchars($record->status) ?>
+                            </span>
+                        </td>
+                        <td class="py-4 text-right text-xs font-bold text-gray-400"><?= htmlspecialchars($record->marked_by ?? 'N/A') ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <?php if ($_SESSION['role'] === 'Teacher'): ?>
     <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-gradient-to-b from-school-purple to-purple-900 border-none hidden lg:flex flex-col p-8 shadow-2xl shadow-purple-900/30">
@@ -316,7 +384,10 @@ if ($_SESSION['role'] === 'Teacher') {
                                         </div>
                                         <div>
                                             <h4 class="text-sm font-black text-school-accent tracking-tighter uppercase"><?= htmlspecialchars($student->name) ?></h4>
-                                            <p class="text-[9px] text-gray-400 font-bold uppercase mt-0.5">Academic Learner</p>
+                                            <a href="?form=<?= urlencode($form) ?>&date=<?= $date ?>&history_id=<?= $s_id ?>" class="mt-1 inline-flex items-center space-x-1 text-[9px] font-black text-school-purple hover:text-school-coral uppercase tracking-widest transition-all">
+                                                <i data-lucide="history" class="w-3 h-3"></i>
+                                                <span>View History</span>
+                                            </a>
                                         </div>
                                     </div>
                                 </td>
