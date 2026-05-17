@@ -24,17 +24,17 @@
                 <form method="POST" autocomplete="off" class="relative z-10 flex flex-col space-y-10 mb-16">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div class="space-y-4">
-                            <label class="block text-[10px] font-black text-school-blue uppercase tracking-[0.4em] ml-4">01. Student Identity</label>
+                            <label class="block text-[10px] font-black text-school-blue uppercase tracking-[0.4em] ml-4">Your ID</label>
                             <div class="relative w-full">
                                 <i data-lucide="user" class="absolute left-8 top-1/2 -translate-y-1/2 text-school-blue w-5 h-5"></i>
                                 <input type="text" name="student_id" required autocomplete="off" placeholder="Ex: 1001" class="w-full bg-white border-2 border-gray-100 shadow-xl shadow-school-blue/5 focus:border-school-blue focus:ring-0 rounded-[2rem] py-7 pl-20 pr-8 outline-none text-base font-black text-school-blue transition-all uppercase tracking-widest placeholder:text-gray-200">
                             </div>
                         </div>
                         <div class="space-y-4">
-                            <label class="block text-[10px] font-black text-school-blue uppercase tracking-[0.4em] ml-4">02. Access Password</label>
+                            <label class="block text-[10px] font-black text-school-blue uppercase tracking-[0.4em] ml-4">Your Password</label>
                             <div class="relative w-full">
                                 <i data-lucide="lock" class="absolute left-8 top-1/2 -translate-y-1/2 text-school-blue w-5 h-5"></i>
-                                <input type="password" name="password" required autocomplete="new-password" placeholder="••••••••" class="w-full bg-white border-2 border-gray-100 shadow-xl shadow-school-blue/5 focus:border-school-blue focus:ring-0 rounded-[2rem] py-7 pl-20 pr-8 outline-none text-base font-black text-school-blue transition-all uppercase tracking-widest placeholder:text-gray-200">
+                                <input type="password" name="password" required autocomplete="new-password" placeholder="••••" class="w-full bg-white border-2 border-gray-100 shadow-xl shadow-school-blue/5 focus:border-school-blue focus:ring-0 rounded-[2rem] py-7 pl-20 pr-8 outline-none text-base font-black text-school-blue transition-all uppercase tracking-widest placeholder:text-gray-200">
                             </div>
                         </div>
                     </div>
@@ -43,7 +43,7 @@
                             <i data-lucide="shield-check" class="w-6 h-6 group-hover:scale-110 transition-transform"></i>
                             <span>Securely Retrieve Result</span>
                         </button>
-                        <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center">Note: Your password is your Student ID by default</p>
+                        <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center">Note: Default 4-digit password is 1234 or your Student ID</p>
                     </div>
                 </form>
 
@@ -56,8 +56,8 @@
                     $student = $studentColl->findOne(['student_id' => $student_id_raw]);
                     
                     if ($student):
-                        // Simple Logic: Password matches ID or Phone
-                        $is_valid = ($password_raw === $student->student_id) || ($password_raw === ($student->student_phone ?? ''));
+                        // Simple Logic: Password matches ID, Phone, or default 1234
+                        $is_valid = ($password_raw === '1234') || ($password_raw === $student->student_id) || ($password_raw === ($student->student_phone ?? ''));
                         
                         if ($is_valid):
                             $resultsColl = $database->getCollection('results');

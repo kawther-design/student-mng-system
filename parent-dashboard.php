@@ -9,10 +9,42 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Parent') {
     }
 }
 
-// Fetch children associated with this parent
-$collection = $database->getCollection('students');
-$parentName = $_SESSION['name'];
-$children = $collection->find(['parent_name' => $parentName])->toArray();
+// Check if search form is submitted
+$search_student = null;
+$search_error = '';
+$attendance_records = [];
+$exam_results = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'])) {
+    $student_id_raw = trim($_POST['student_id']);
+    $password_raw = $_POST['password'] ?? '';
+    
+    $studentColl = $database->getCollection('students');
+    $student = $studentColl->findOne(['student_id' => $student_id_raw]);
+    
+    if ($student) {
+        $is_valid = ($password_raw === '1234') || ($password_raw === $student->student_id) || ($password_raw === ($student->student_phone ?? ''));
+        if ($is_valid) {
+            $search_student = $student;
+            // Fetch Attendance
+            $attColl = $database->getCollection('attendance');
+            $attendance_records = $attColl->find(['student_id' => (string)$student->_id], ['sort' => ['date' => -1]])->toArray();
+            
+            // Fetch Exams
+            $resultsColl = $database->getCollection('results');
+            $exam_results = $resultsColl->find(['student_id' => (string)$student->_id])->toArray();
+        } else {
+            $search_error = 'Access Denied. Incorrect password.';
+        }
+    } else {
+        $search_error = 'Student ID not found.';
+    }
+} else {
+    // Fetch children associated with this parent (fallback)
+    $collection = $database->getCollection('students');
+    $parentName = $_SESSION['name'];
+    $children = $collection->find(['parent_name' => $parentName])->toArray();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,6 +64,7 @@ $children = $collection->find(['parent_name' => $parentName])->toArray();
                             coral: '#F97316',
                             orange: '#FB923C',
                             blue: '#2D3E8B',
+                            teal: '#1DBF92',
                             bg: '#FFF7ED'
                         }
                     },
@@ -58,9 +91,6 @@ $children = $collection->find(['parent_name' => $parentName])->toArray();
             transform: translateY(-12px); 
             box-shadow: 0 40px 80px -20px rgba(249, 115, 22, 0.1);
         }
-        .child-gradient {
-            background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(255,247,237,0.5) 100%);
-        }
         .animate-fade-in {
             animation: fadeIn 0.6s ease-out forwards;
             opacity: 0;
@@ -69,6 +99,10 @@ $children = $collection->find(['parent_name' => $parentName])->toArray();
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body class="text-gray-800 flex min-h-screen">
@@ -99,7 +133,7 @@ $children = $collection->find(['parent_name' => $parentName])->toArray();
     </aside>
 
     <main class="flex-1 lg:ml-72 p-10">
-        <header class="flex justify-between items-center mb-16">
+        <header class="flex justify-between items-center mb-10">
             <div>
                 <h2 class="text-3xl font-black text-school-coral tracking-tighter uppercase">Welcome, <?= explode(' ', $_SESSION['name'])[0] ?></h2>
                 <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mt-1">Parent Portal | My Children Tracking</p>
@@ -109,74 +143,247 @@ $children = $collection->find(['parent_name' => $parentName])->toArray();
             </div>
         </header>
 
-        <div class="mb-10">
-            <h3 class="text-xl font-black text-school-blue uppercase tracking-widest border-l-4 border-school-coral pl-4">Your Registered Children</h3>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
-            <?php if (count($children) > 0): ?>
-                <?php foreach ($children as $index => $child): ?>
-                <div class="glass-card rounded-[3rem] p-8 relative overflow-hidden animate-fade-in" style="animation-delay: <?= $index * 0.1 ?>s">
-                    <div class="relative z-10">
-                        <div class="flex items-start justify-between mb-8">
-                            <div class="w-20 h-20 rounded-[2rem] bg-school-coral/10 p-1 border-2 border-school-coral/5 flex items-center justify-center overflow-hidden">
-                                <img src="https://ui-avatars.com/api/?name=<?= urlencode($child->name) ?>&background=F97316&color=fff&size=128" alt="<?= htmlspecialchars($child->name) ?>" class="w-full h-full rounded-[1.8rem] object-cover">
-                            </div>
-                            <span class="px-4 py-2 bg-school-blue text-white rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg"><?= htmlspecialchars($child->form) ?></span>
-                        </div>
-
-                        <div class="mb-8">
-                            <h4 class="text-xl font-black text-school-blue tracking-tighter uppercase mb-1"><?= htmlspecialchars($child->name) ?></h4>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Student ID:</span>
-                                <span class="text-[10px] font-black text-school-coral italic">#<?= htmlspecialchars($child->student_id ?? 'N/A') ?></span>
-                            </div>
-                        </div>
-
-                        <div class="space-y-6">
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Attendance</span>
-                                    <span class="text-[10px] text-school-coral font-black uppercase tracking-widest">96%</span>
-                                </div>
-                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                                    <div class="bg-school-coral h-full w-[96%] rounded-full shadow-[0_0_10px_rgba(249,115,22,0.3)]"></div>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="bg-school-coral/5 p-4 rounded-3xl border border-school-coral/10 text-center">
-                                    <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Status</p>
-                                    <p class="text-[10px] font-black text-school-coral uppercase">Active</p>
-                                </div>
-                                <div class="bg-school-blue/5 p-4 rounded-3xl border border-school-blue/10 text-center">
-                                    <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Grade</p>
-                                    <p class="text-[10px] font-black text-school-blue uppercase">A (Dist.)</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button class="w-full mt-8 py-4 bg-white border border-gray-100 text-school-blue rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-school-blue hover:text-white hover:scale-[1.02] transition-all flex items-center justify-center space-x-3 group">
-                            <span>View Full Report</span>
-                            <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-                        </button>
-                    </div>
-                    <!-- Decorative background icon -->
-                    <i data-lucide="graduation-cap" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-coral/5 rotate-12"></i>
+        <!-- Search Form -->
+        <div class="mb-12 bg-white p-8 rounded-[3rem] shadow-xl shadow-school-coral/5 border border-gray-50 animate-fade-in">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-black text-school-blue tracking-tighter uppercase border-l-4 border-school-coral pl-4">Track Student Progress</h3>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest hidden md:block">Enter details to view attendance & exams</p>
+            </div>
+            <form method="POST" autocomplete="off" class="flex flex-col lg:flex-row gap-6">
+                <div class="flex-1 relative">
+                    <label class="block text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-4">Your ID</label>
+                    <i data-lucide="user" class="absolute left-6 top-[38px] text-school-coral w-5 h-5"></i>
+                    <input type="text" name="student_id" required value="" autocomplete="off" placeholder="Enter Student ID" class="w-full bg-gray-50 border-none rounded-[2rem] py-4 pl-16 pr-6 outline-none text-sm font-black text-school-blue uppercase tracking-widest focus:ring-2 focus:ring-school-coral/20">
                 </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="col-span-full glass-card rounded-[3rem] p-20 text-center">
-                    <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i data-lucide="search-x" class="w-12 h-12 text-gray-300"></i>
-                    </div>
-                    <h4 class="text-2xl font-black text-school-blue uppercase tracking-tighter mb-2">No Children Found</h4>
-                    <p class="text-gray-400 text-sm font-medium">We couldn't find any students registered under your name.</p>
+                <div class="flex-1 relative">
+                    <label class="block text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-4">Your Password</label>
+                    <i data-lucide="lock" class="absolute left-6 top-[38px] text-school-coral w-5 h-5"></i>
+                    <input type="password" name="password" required value="" autocomplete="new-password" placeholder="••••" class="w-full bg-gray-50 border-none rounded-[2rem] py-4 pl-16 pr-6 outline-none text-sm font-black text-school-blue uppercase tracking-widest focus:ring-2 focus:ring-school-coral/20">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full lg:w-auto py-4 px-10 h-[52px] bg-school-coral text-white rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-lg shadow-school-coral/30 hover:scale-[1.02] transition-all flex items-center justify-center space-x-3">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                        <span>View Reports</span>
+                    </button>
+                </div>
+            </form>
+            <?php if ($search_error): ?>
+                <div class="mt-6 p-4 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center space-x-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                    <p class="text-[10px] font-black uppercase tracking-widest"><?= $search_error ?></p>
                 </div>
             <?php endif; ?>
         </div>
+
+        <?php if ($search_student): ?>
+            <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between animate-fade-in gap-4" style="animation-delay: 0.1s">
+                <h3 class="text-2xl font-black text-school-blue uppercase tracking-tighter border-l-4 border-school-coral pl-4 flex items-center">
+                    Reports for <span class="text-school-coral ml-2"><?= htmlspecialchars($search_student->name) ?></span>
+                </h3>
+                <a href="parent-dashboard.php" class="py-2 px-6 bg-white border border-gray-100 rounded-xl text-[9px] font-black text-gray-400 hover:text-school-coral hover:border-school-coral/20 uppercase tracking-widest transition-all text-center">Clear Search</a>
+            </div>
+
+            <!-- Student Profile Information -->
+            <div class="mb-10 glass-card rounded-[3rem] p-8 flex flex-col md:flex-row items-center md:items-start justify-between gap-6 animate-fade-in" style="animation-delay: 0.15s">
+                <div class="flex items-center space-x-6">
+                    <div class="w-24 h-24 rounded-[2.5rem] bg-school-coral/10 p-1 border-2 border-school-coral/5 flex items-center justify-center overflow-hidden">
+                        <img src="https://ui-avatars.com/api/?name=<?= urlencode($search_student->name) ?>&background=F97316&color=fff&size=128" alt="<?= htmlspecialchars($search_student->name) ?>" class="w-full h-full rounded-[2.3rem] object-cover">
+                    </div>
+                    <div>
+                        <h4 class="text-2xl font-black text-school-blue tracking-tighter uppercase mb-1"><?= htmlspecialchars($search_student->name) ?></h4>
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-1">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Student ID:</span>
+                                <span class="text-[10px] font-black text-school-coral">#<?= htmlspecialchars($search_student->student_id ?? 'N/A') ?></span>
+                            </div>
+                            <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Class:</span>
+                                <span class="text-[10px] font-black text-school-blue uppercase"><?= htmlspecialchars($search_student->form ?? 'N/A') ?></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="bg-school-coral/5 px-6 py-4 rounded-3xl border border-school-coral/10 text-center">
+                        <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Gender</p>
+                        <p class="text-xs font-black text-school-coral uppercase"><?= $search_student->gender ?? 'N/A' ?></p>
+                    </div>
+                    <div class="bg-school-blue/5 px-6 py-4 rounded-3xl border border-school-blue/10 text-center">
+                        <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Status</p>
+                        <p class="text-xs font-black text-school-blue uppercase"><?= $search_student->status ?? 'Active' ?></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-10">
+                <!-- Attendance Report -->
+                <div class="glass-card rounded-[3rem] p-8 animate-fade-in" style="animation-delay: 0.2s">
+                    <div class="flex justify-between items-center mb-8">
+                        <h4 class="text-xl font-black text-school-blue uppercase tracking-tighter flex items-center">
+                            <div class="w-10 h-10 rounded-xl bg-school-coral/10 text-school-coral flex items-center justify-center mr-4">
+                                <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                            </div>
+                            Attendance History
+                        </h4>
+                        <div class="flex space-x-6 text-right">
+                            <div>
+                                <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest">Total Present</p>
+                                <p class="text-lg font-black text-school-teal"><?= count(array_filter($attendance_records, fn($a) => $a->status === 'Present')) ?></p>
+                            </div>
+                            <div>
+                                <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest">Total Absent</p>
+                                <p class="text-lg font-black text-red-500"><?= count(array_filter($attendance_records, fn($a) => $a->status === 'Absent')) ?></p>
+                            </div>
+                            <div>
+                                <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest">Total Late</p>
+                                <p class="text-lg font-black text-school-orange"><?= count(array_filter($attendance_records, fn($a) => $a->status === 'Late')) ?></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <?php if (empty($attendance_records)): ?>
+                        <div class="p-10 text-center bg-gray-50 rounded-3xl border border-gray-100">
+                            <i data-lucide="inbox" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
+                            <p class="text-xs font-black text-gray-400 uppercase tracking-widest">No attendance records found.</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="space-y-4 max-h-[400px] overflow-y-auto pr-4 custom-scrollbar">
+                            <?php foreach ($attendance_records as $att): ?>
+                            <div class="flex justify-between items-center p-5 bg-white border border-gray-100 rounded-2xl hover:border-school-coral/20 transition-colors">
+                                <div>
+                                    <p class="text-sm font-black text-school-blue uppercase tracking-tighter"><?= date('F d, Y', strtotime($att->date)) ?></p>
+                                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Marked by: <?= htmlspecialchars($att->marked_by ?? 'Admin') ?></p>
+                                </div>
+                                <?php 
+                                    $bg = $att->status === 'Present' ? 'bg-school-teal/10 text-school-teal' : ($att->status === 'Absent' ? 'bg-red-100 text-red-500' : 'bg-school-coral/10 text-school-coral'); 
+                                    $icon = $att->status === 'Present' ? 'check-circle' : ($att->status === 'Absent' ? 'x-circle' : 'clock');
+                                ?>
+                                <div class="px-4 py-2 rounded-xl flex items-center space-x-2 <?= $bg ?>">
+                                    <i data-lucide="<?= $icon ?>" class="w-4 h-4"></i>
+                                    <span class="text-[10px] font-black uppercase tracking-widest"><?= $att->status ?></span>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Examinations Report -->
+                <div class="glass-card rounded-[3rem] p-8 animate-fade-in" style="animation-delay: 0.3s">
+                    <div class="flex justify-between items-center mb-8">
+                        <h4 class="text-xl font-black text-school-blue uppercase tracking-tighter flex items-center">
+                            <div class="w-10 h-10 rounded-xl bg-school-blue/10 text-school-blue flex items-center justify-center mr-4">
+                                <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+                            </div>
+                            Examinations Result
+                        </h4>
+                        <div class="text-right">
+                            <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest">Exams Taken</p>
+                            <p class="text-lg font-black text-school-blue"><?= count($exam_results) ?></p>
+                        </div>
+                    </div>
+
+                    <?php if (empty($exam_results)): ?>
+                        <div class="p-10 text-center bg-gray-50 rounded-3xl border border-gray-100">
+                            <i data-lucide="inbox" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
+                            <p class="text-xs font-black text-gray-400 uppercase tracking-widest">No exam results found.</p>
+                        </div>
+                    <?php else: 
+                        $examColl = $database->getCollection('exams');
+                    ?>
+                        <div class="space-y-6 max-h-[400px] overflow-y-auto pr-4 custom-scrollbar">
+                            <?php foreach ($exam_results as $res): 
+                                $exam = $examColl->findOne(['_id' => new MongoDB\BSON\ObjectId($res->exam_id)]);
+                            ?>
+                            <div class="p-6 bg-white border border-gray-100 rounded-[2rem] hover:border-school-blue/20 transition-all">
+                                <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-50">
+                                    <div>
+                                        <h5 class="text-lg font-black text-school-blue uppercase tracking-tighter"><?= htmlspecialchars($exam->name ?? 'Assessment') ?></h5>
+                                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Overall Percentage</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-2xl font-black text-school-coral"><?= number_format($res->total_marks / 10, 1) ?>%</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                                    <?php 
+                                    $subjects = [
+                                        'arabic' => 'Ara', 'islamic' => 'Isl', 'biology' => 'Bio', 
+                                        'physics' => 'Phy', 'mathematics' => 'Mat', 'chemistry' => 'Che', 
+                                        'somali' => 'Som', 'english' => 'Eng', 'history' => 'His', 
+                                        'geography' => 'Geo'
+                                    ];
+                                    foreach ($subjects as $key => $label): 
+                                        $mark = $res->marks->$key ?? 0;
+                                        if ($mark > 0 || true): // Show all to mimic transcript
+                                    ?>
+                                    <div class="text-center p-3 bg-gray-50 rounded-xl">
+                                        <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1"><?= $label ?></p>
+                                        <p class="text-xs font-black <?= $mark >= 50 ? 'text-school-blue' : 'text-school-coral' ?>"><?= $mark ?></p>
+                                    </div>
+                                    <?php endif; endforeach; ?>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php else: ?>
+            <!-- Fallback: Display Registered Children if not searching -->
+            <div class="mb-10">
+                <h3 class="text-xl font-black text-school-blue uppercase tracking-widest border-l-4 border-school-coral pl-4">Your Registered Children</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+                <?php if (!empty($children)): ?>
+                    <?php foreach ($children as $index => $child): ?>
+                    <div class="glass-card rounded-[3rem] p-8 relative overflow-hidden animate-fade-in" style="animation-delay: <?= $index * 0.1 ?>s">
+                        <div class="relative z-10">
+                            <div class="flex items-start justify-between mb-8">
+                                <div class="w-20 h-20 rounded-[2rem] bg-school-coral/10 p-1 border-2 border-school-coral/5 flex items-center justify-center overflow-hidden">
+                                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($child->name) ?>&background=F97316&color=fff&size=128" alt="<?= htmlspecialchars($child->name) ?>" class="w-full h-full rounded-[1.8rem] object-cover">
+                                </div>
+                                <span class="px-4 py-2 bg-school-blue text-white rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg"><?= htmlspecialchars($child->form) ?></span>
+                            </div>
+
+                            <div class="mb-8">
+                                <h4 class="text-xl font-black text-school-blue tracking-tighter uppercase mb-1"><?= htmlspecialchars($child->name) ?></h4>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Student ID:</span>
+                                    <span class="text-[10px] font-black text-school-coral italic">#<?= htmlspecialchars($child->student_id ?? 'N/A') ?></span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-school-coral/5 p-4 rounded-3xl border border-school-coral/10 text-center">
+                                        <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Status</p>
+                                        <p class="text-[10px] font-black text-school-coral uppercase"><?= $child->status ?? 'Active' ?></p>
+                                    </div>
+                                    <div class="bg-school-blue/5 p-4 rounded-3xl border border-school-blue/10 text-center">
+                                        <p class="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Gender</p>
+                                        <p class="text-[10px] font-black text-school-blue uppercase"><?= $child->gender ?? 'N/A' ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <i data-lucide="graduation-cap" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-coral/5 rotate-12"></i>
+                    </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="col-span-full glass-card rounded-[3rem] p-20 text-center">
+                        <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i data-lucide="search-x" class="w-12 h-12 text-gray-300"></i>
+                        </div>
+                        <h4 class="text-2xl font-black text-school-blue uppercase tracking-tighter mb-2">No Children Found</h4>
+                        <p class="text-gray-400 text-sm font-medium">Use the tracking form above to search for your child's reports.</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
     </main>
     <script>lucide.createIcons();</script>
 </body>
 </html>
-

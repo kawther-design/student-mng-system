@@ -34,19 +34,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 // Fetch Students for selected Form
-$form = isset($_GET['form']) ? $_GET['form'] : 'Form 1';
+$form = isset($_GET['form']) ? $_GET['form'] : 'FORM 1 A';
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 
 $studentColl = $database->getCollection('students');
-$students = $studentColl->find(['form' => $form], ['sort' => ['name' => 1]])->toArray();
+$students = $studentColl->find(['form' => new MongoDB\BSON\Regex('^' . preg_quote($form, '/') . '$', 'i')], ['sort' => ['name' => 1]])->toArray();
 
-// Get all unique classes for the dropdown
-$allClasses = $studentColl->distinct('form');
-sort($allClasses);
+// Hardcode all possible classes (Forms 1-4, Sections A-E)
+$allClasses = [];
+foreach (['FORM 1', 'FORM 2', 'FORM 3', 'FORM 4'] as $baseForm) {
+    foreach (['A', 'B', 'C', 'D', 'E'] as $section) {
+        $allClasses[] = $baseForm . ' ' . $section;
+    }
+}
 
 // Fetch existing attendance for the date
 $attColl = $database->getCollection('attendance');
-$existingAtt = $attColl->find(['form' => $form, 'date' => $date])->toArray();
+$existingAtt = $attColl->find(['form' => new MongoDB\BSON\Regex('^' . preg_quote($form, '/') . '$', 'i'), 'date' => $date])->toArray();
 $attStatus = [];
 foreach ($existingAtt as $record) {
     $attStatus[$record->student_id] = $record->status;
@@ -129,6 +133,37 @@ if ($_SESSION['role'] === 'Teacher') {
 </head>
 <body class="text-gray-800 flex min-h-screen">
 
+    <?php if ($_SESSION['role'] === 'Teacher'): ?>
+    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-gradient-to-b from-school-purple to-purple-900 border-none hidden lg:flex flex-col p-8 shadow-2xl shadow-purple-900/30">
+        <div class="flex items-center space-x-4 mb-16">
+            <div class="w-12 h-12 bg-white rounded-[1.2rem] flex items-center justify-center shadow-xl">
+                <i data-lucide="presentation" class="text-school-purple w-7 h-7"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-black text-white tracking-tighter">AL HUDA</h1>
+                <p class="text-[9px] font-black text-purple-200 uppercase tracking-[0.3em] mt-1">Teacher Portal v2.0</p>
+            </div>
+        </div>
+        
+        <nav class="flex-1 space-y-3">
+            <a href="teacher-dashboard.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-purple-200 hover:text-white hover:bg-white/10 transition-all">
+                <i data-lucide="layout-grid" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm">Dashboard</span>
+            </a>
+            <a href="manage-attendance.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]" style="background: rgba(255, 255, 255, 0.15); color: white; box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                <span class="font-black text-sm uppercase tracking-widest text-white">Attendance</span>
+            </a>
+        </nav>
+
+        <div class="pt-8 border-t border-white/10">
+            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-red-300 hover:bg-red-500 hover:text-white transition-all group">
+                <i data-lucide="log-out" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
+                <span class="font-black text-sm uppercase tracking-widest">Sign Out</span>
+            </a>
+        </div>
+    </aside>
+    <?php else: ?>
     <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-accent/5">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-school-accent rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-accent/20">
@@ -168,14 +203,7 @@ if ($_SESSION['role'] === 'Teacher') {
             </a>
             <?php endif; ?>
 
-            <?php if ($_SESSION['role'] === 'Teacher'): ?>
-            <a href="manage-attendance.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
-                <i data-lucide="calendar-check" class="w-5 h-5"></i>
-                <span class="font-black text-sm uppercase tracking-widest">Attendance</span>
-            </a>
-            <?php endif; ?>
-
-            <?php if ($_SESSION['role'] !== 'Teacher' && $_SESSION['role'] !== 'Vice President' && $_SESSION['role'] !== 'Teacher'): ?>
+            <?php if ($_SESSION['role'] !== 'Teacher' && $_SESSION['role'] !== 'Vice President'): ?>
             <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Exam & Results</span>
@@ -197,6 +225,7 @@ if ($_SESSION['role'] === 'Teacher') {
             </a>
         </div>
     </aside>
+    <?php endif; ?>
 
     <main class="flex-1 lg:ml-72 w-full">
         <form method="POST" class="w-full">
@@ -221,14 +250,16 @@ if ($_SESSION['role'] === 'Teacher') {
                             <div>
                                 <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 px-1">Selected Class</span>
                                 <select onchange="location.href='?form='+this.value+'&date=<?= $date ?>'" class="bg-gray-50 border-none rounded-2xl py-4 px-8 text-sm font-black text-school-accent uppercase tracking-tighter outline-none cursor-pointer hover:bg-gray-100 transition-all">
-                                    <?php if (empty($allClasses)): ?>
-                                        <option value="">No Classes Found</option>
-                                    <?php else: ?>
-                                        <?php foreach($allClasses as $className): ?>
-                                            <?php if (empty($className)) continue; ?>
-                                            <option value="<?= htmlspecialchars($className) ?>" <?= $form === $className ? 'selected' : '' ?>><?= htmlspecialchars($className) ?></option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
+                                    <?php foreach (['FORM 1', 'FORM 2', 'FORM 3', 'FORM 4'] as $baseForm): ?>
+                                        <optgroup label="<?= $baseForm ?>">
+                                            <?php foreach (['A', 'B', 'C', 'D', 'E'] as $section): ?>
+                                                <?php $className = $baseForm . ' ' . $section; ?>
+                                                <option value="<?= htmlspecialchars($className) ?>" <?= $form === $className ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($className) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </optgroup>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="w-px h-12 bg-gray-100 mx-2"></div>

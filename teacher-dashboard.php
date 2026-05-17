@@ -70,9 +70,10 @@ foreach ($attendanceRecords as $record) {
         }
         .sidebar-item { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .sidebar-item.active { 
-            background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+            background: rgba(255, 255, 255, 0.15);
             color: white; 
-            box-shadow: 0 15px 30px -10px rgba(139, 92, 246, 0.4); 
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .glass-card { 
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -141,30 +142,30 @@ foreach ($attendanceRecords as $record) {
     <div class="decorative-blob top-[-200px] right-[-200px]"></div>
     <div class="decorative-blob bottom-[-200px] left-[100px]"></div>
 
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white/80 backdrop-blur-xl border-r border-school-purple/10 flex flex-col p-8 shadow-2xl shadow-school-purple/5">
+    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-gradient-to-b from-school-purple to-purple-900 border-none flex flex-col p-8 shadow-2xl shadow-purple-900/30">
         <div class="flex items-center space-x-4 mb-16">
-            <div class="w-12 h-12 bg-school-purple rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-purple/20">
-                <i data-lucide="book-open" class="text-white w-7 h-7"></i>
+            <div class="w-12 h-12 bg-white rounded-[1.2rem] flex items-center justify-center shadow-xl">
+                <i data-lucide="presentation" class="text-school-purple w-7 h-7"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-black text-school-purple tracking-tighter">AL HUDA</h1>
-                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">Faculty Portal v2.0</p>
+                <h1 class="text-2xl font-black text-white tracking-tighter">AL HUDA</h1>
+                <p class="text-[9px] font-black text-purple-200 uppercase tracking-[0.3em] mt-1">Teacher Portal v2.0</p>
             </div>
         </div>
         
         <nav class="flex-1 space-y-3">
             <a href="teacher-dashboard.php" class="sidebar-item active flex items-center space-x-4 p-4 rounded-[1.5rem]">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
-                <span class="font-black text-sm uppercase tracking-widest">Dashboard</span>
+                <span class="font-black text-sm uppercase tracking-widest text-white">Dashboard</span>
             </a>
-            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-purple hover:bg-school-purple/5 transition-all">
+            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-purple-200 hover:text-white hover:bg-white/10 transition-all">
                 <i data-lucide="calendar-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Attendance</span>
             </a>
         </nav>
 
-        <div class="pt-8 border-t border-gray-100">
-            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-red-500 hover:bg-red-50 transition-all group">
+        <div class="pt-8 border-t border-white/10">
+            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-red-300 hover:bg-red-500 hover:text-white transition-all group">
                 <i data-lucide="log-out" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Sign Out</span>
             </a>
@@ -175,13 +176,13 @@ foreach ($attendanceRecords as $record) {
         <header class="flex justify-between items-center mb-16">
             <div class="flex items-center space-x-6">
                 <div class="w-16 h-16 bg-gradient-to-br from-school-purple to-purple-800 rounded-[1.8rem] flex items-center justify-center shadow-2xl shadow-school-purple/30 group">
-                    <i data-lucide="layout-grid" class="text-white w-8 h-8 group-hover:scale-110 transition-transform"></i>
+                    <i data-lucide="presentation" class="text-white w-8 h-8 group-hover:scale-110 transition-transform"></i>
                 </div>
                 <div>
                     <h2 class="text-4xl font-black text-school-purple tracking-tighter uppercase leading-tight">Dashboard</h2>
                     <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] mt-1 flex items-center">
                         <span class="w-2 h-2 bg-school-orange rounded-full mr-2"></span>
-                        Faculty Oversight
+                        Teacher Oversight
                     </p>
                 </div>
             </div>
@@ -190,7 +191,7 @@ foreach ($attendanceRecords as $record) {
                     <p class="text-sm font-black text-school-purple uppercase tracking-widest leading-none"><?= explode(' ', $_SESSION['name'])[0] ?></p>
                     <p class="text-[9px] font-black text-school-orange uppercase tracking-widest mt-2 flex items-center justify-end">
                         <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
-                        Active Faculty
+                        Active Teacher
                     </p>
                 </div>
                 <div class="w-16 h-16 rounded-[1.8rem] bg-white p-1.5 border-2 border-school-purple/10 flex items-center justify-center shadow-lg">
@@ -207,60 +208,67 @@ foreach ($attendanceRecords as $record) {
             <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-2 italic">Real-time status tracking for current academic cycle</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
-            <div class="glass-card p-10 rounded-[4rem] relative group cursor-default overflow-hidden">
-                <div class="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <i data-lucide="users" class="w-24 h-24 text-school-purple"></i>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div onclick="openStatusModal('Present')" class="glass-card p-8 rounded-[2.5rem] relative group cursor-pointer hover:bg-green-50/50 transition-all border-green-100/50 overflow-hidden flex flex-col justify-between h-48">
+                <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i data-lucide="check-circle" class="w-32 h-32 text-green-500 transform translate-x-4 -translate-y-4"></i>
                 </div>
-                <div class="p-5 bg-school-purple text-white w-fit rounded-[1.5rem] mb-10 shadow-xl shadow-school-purple/20">
-                    <i data-lucide="users" class="w-8 h-8"></i>
+                <div class="flex items-start justify-between">
+                    <div class="p-4 bg-green-500 text-white w-fit rounded-2xl shadow-xl shadow-green-500/20">
+                        <i data-lucide="check-circle" class="w-6 h-6"></i>
+                    </div>
+                    <div class="text-right">
+                        <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-[0.2em]">Present Students</h4>
+                        <p class="text-5xl font-black text-green-500 tracking-tighter mt-1"><?= $counts['Present'] ?></p>
+                    </div>
                 </div>
-                <h4 class="text-gray-400 font-black text-[11px] uppercase tracking-[0.2em]">Total Students</h4>
-                <p class="text-6xl font-black text-school-purple mt-4 tracking-tighter"><?= $totalStudents ?></p>
-            </div>
-
-            <div onclick="openStatusModal('Present')" class="glass-card p-10 rounded-[4rem] relative group cursor-pointer hover:bg-green-50 transition-all border-green-100/30 overflow-hidden">
-                <div class="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <i data-lucide="check-circle" class="w-24 h-24 text-green-500"></i>
-                </div>
-                <div class="p-5 bg-green-500 text-white w-fit rounded-[1.5rem] mb-10 shadow-xl shadow-green-500/20">
-                    <i data-lucide="check-circle" class="w-8 h-8"></i>
-                </div>
-                <h4 class="text-gray-400 font-black text-[11px] uppercase tracking-[0.2em]">Present</h4>
-                <p class="text-6xl font-black text-green-500 mt-4 tracking-tighter"><?= $counts['Present'] ?></p>
-                <div class="mt-8 flex items-center text-[9px] font-black text-green-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                    <span class="bg-green-100 px-3 py-1 rounded-full">View Details</span>
-                    <i data-lucide="arrow-up-right" class="w-3 h-3 ml-2"></i>
+                <div class="flex items-center justify-between mt-auto">
+                    <div class="flex items-center text-[9px] font-black text-green-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                        <span class="bg-green-100 px-3 py-1 rounded-full">View Roster</span>
+                        <i data-lucide="arrow-right" class="w-3 h-3 ml-2"></i>
+                    </div>
                 </div>
             </div>
 
-            <div onclick="openStatusModal('Absent')" class="glass-card p-10 rounded-[4rem] relative group cursor-pointer hover:bg-red-50 transition-all border-red-100/30 overflow-hidden">
-                <div class="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <i data-lucide="x-circle" class="w-24 h-24 text-red-500"></i>
+            <div onclick="openStatusModal('Absent')" class="glass-card p-8 rounded-[2.5rem] relative group cursor-pointer hover:bg-red-50/50 transition-all border-red-100/50 overflow-hidden flex flex-col justify-between h-48">
+                <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i data-lucide="x-circle" class="w-32 h-32 text-red-500 transform translate-x-4 -translate-y-4"></i>
                 </div>
-                <div class="p-5 bg-red-500 text-white w-fit rounded-[1.5rem] mb-10 shadow-xl shadow-red-500/20">
-                    <i data-lucide="x-circle" class="w-8 h-8"></i>
+                <div class="flex items-start justify-between">
+                    <div class="p-4 bg-red-500 text-white w-fit rounded-2xl shadow-xl shadow-red-500/20">
+                        <i data-lucide="x-circle" class="w-6 h-6"></i>
+                    </div>
+                    <div class="text-right">
+                        <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-[0.2em]">Absent Students</h4>
+                        <p class="text-5xl font-black text-red-500 tracking-tighter mt-1"><?= $counts['Absent'] ?></p>
+                    </div>
                 </div>
-                <h4 class="text-gray-400 font-black text-[11px] uppercase tracking-[0.2em]">Absent</h4>
-                <p class="text-6xl font-black text-red-500 mt-4 tracking-tighter"><?= $counts['Absent'] ?></p>
-                <div class="mt-8 flex items-center text-[9px] font-black text-red-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                    <span class="bg-red-100 px-3 py-1 rounded-full">View Details</span>
-                    <i data-lucide="arrow-up-right" class="w-3 h-3 ml-2"></i>
+                <div class="flex items-center justify-between mt-auto">
+                    <div class="flex items-center text-[9px] font-black text-red-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                        <span class="bg-red-100 px-3 py-1 rounded-full">View Roster</span>
+                        <i data-lucide="arrow-right" class="w-3 h-3 ml-2"></i>
+                    </div>
                 </div>
             </div>
 
-            <div onclick="openStatusModal('Late')" class="glass-card p-10 rounded-[4rem] relative group cursor-pointer hover:bg-orange-50 transition-all border-orange-100/30 overflow-hidden">
-                <div class="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <i data-lucide="clock" class="w-24 h-24 text-school-orange"></i>
+            <div onclick="openStatusModal('Late')" class="glass-card p-8 rounded-[2.5rem] relative group cursor-pointer hover:bg-orange-50/50 transition-all border-orange-100/50 overflow-hidden flex flex-col justify-between h-48">
+                <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i data-lucide="clock" class="w-32 h-32 text-school-orange transform translate-x-4 -translate-y-4"></i>
                 </div>
-                <div class="p-5 bg-school-orange text-white w-fit rounded-[1.5rem] mb-10 shadow-xl shadow-school-orange/20">
-                    <i data-lucide="clock" class="w-8 h-8"></i>
+                <div class="flex items-start justify-between">
+                    <div class="p-4 bg-school-orange text-white w-fit rounded-2xl shadow-xl shadow-school-orange/20">
+                        <i data-lucide="clock" class="w-6 h-6"></i>
+                    </div>
+                    <div class="text-right">
+                        <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-[0.2em]">Late Students</h4>
+                        <p class="text-5xl font-black text-school-orange tracking-tighter mt-1"><?= $counts['Late'] ?></p>
+                    </div>
                 </div>
-                <h4 class="text-gray-400 font-black text-[11px] uppercase tracking-[0.2em]">Late</h4>
-                <p class="text-6xl font-black text-school-orange mt-4 tracking-tighter"><?= $counts['Late'] ?></p>
-                <div class="mt-8 flex items-center text-[9px] font-black text-orange-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                    <span class="bg-orange-100 px-3 py-1 rounded-full">View Details</span>
-                    <i data-lucide="arrow-up-right" class="w-3 h-3 ml-2"></i>
+                <div class="flex items-center justify-between mt-auto">
+                    <div class="flex items-center text-[9px] font-black text-orange-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                        <span class="bg-orange-100 px-3 py-1 rounded-full">View Roster</span>
+                        <i data-lucide="arrow-right" class="w-3 h-3 ml-2"></i>
+                    </div>
                 </div>
             </div>
         </div>

@@ -69,33 +69,19 @@ $collection = $database->getCollection('students');
 $filter = [];
 $currentFilter = $_GET['class_filter'] ?? '';
 if ($currentFilter) {
-    $filter['form'] = $currentFilter;
+    // Match any form starting with the filter (e.g., "Form 1" matches "Form 1 A")
+    $filter['form'] = new MongoDB\BSON\Regex('^' . preg_quote($currentFilter, '/'), 'i');
 }
 
 $students = $collection->find($filter, ['sort' => ['name' => 1]])->toArray();
 
-// Get unique classes and group them for filtering
-$allClasses = $collection->distinct('form');
+// Hardcode classes and sections A-E for filtering dropdowns
 $groupedClasses = [
-    'Form 1' => [],
-    'Form 2' => [],
-    'Form 3' => [],
-    'Form 4' => []
+    'Form 1' => ['Form 1 A', 'Form 1 B', 'Form 1 C', 'Form 1 D', 'Form 1 E'],
+    'Form 2' => ['Form 2 A', 'Form 2 B', 'Form 2 C', 'Form 2 D', 'Form 2 E'],
+    'Form 3' => ['Form 3 A', 'Form 3 B', 'Form 3 C', 'Form 3 D', 'Form 3 E'],
+    'Form 4' => ['Form 4 A', 'Form 4 B', 'Form 4 C', 'Form 4 D', 'Form 4 E']
 ];
-
-foreach ($allClasses as $class) {
-    $class = trim($class);
-    if (empty($class)) continue;
-    foreach ($groupedClasses as $baseForm => &$subs) {
-        if (stripos($class, $baseForm) === 0) {
-            if ($class !== $baseForm) {
-                $subs[] = $class;
-            }
-            break;
-        }
-    }
-}
-foreach ($groupedClasses as &$subs) sort($subs);
 
 // Generate next Student ID (Strictly Sequential 4-digit)
 $allStudents = $collection->find(['student_id' => ['$exists' => true]])->toArray();
