@@ -103,6 +103,7 @@ if ($_SESSION['role'] === 'Teacher') {
     <title>Users Management | Al Huda</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="global.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
@@ -203,7 +204,7 @@ if ($_SESSION['role'] === 'Teacher') {
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">System Role</label>
                         <select name="role" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer focus:ring-2 focus:ring-school-accent/5">
-                            <option value="Teacher">Academic Teacher</option>
+                            <option value="Teacher">Academic Teachers</option>
                             <option value="Vice President">Vice President</option>
                             <option value="Parent">Parent / Guardian</option>
                             <option value="Admin">Administrator</option>
@@ -285,7 +286,7 @@ if ($_SESSION['role'] === 'Teacher') {
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">System Role</label>
                         <select name="role" id="edit-role" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer focus:ring-2 focus:ring-school-accent/5">
-                            <option value="Teacher">Academic Teacher</option>
+                            <option value="Teacher">Academic Teachers</option>
                             <option value="Vice President">Vice President</option>
                             <option value="Parent">Parent / Guardian</option>
                             <option value="Admin">Administrator</option>

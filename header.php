@@ -11,6 +11,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
+    <link href="global.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
@@ -55,16 +56,17 @@ $current_page = basename($_SERVER['PHP_SELF']);
         .nav-link {
             position: relative;
             font-weight: 800;
-            font-size: 11px;
-            color: #9CA3AF;
+            font-size: 14px;
+            color: #2D3E8B;
+            opacity: 0.75;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            transition: color 0.3s ease;
+            transition: opacity 0.3s ease;
         }
 
         .nav-link.active,
         .nav-link:hover {
-            color: #2D3E8B;
+            opacity: 1;
         }
 
         .nav-link::after {

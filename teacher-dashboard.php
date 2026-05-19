@@ -40,9 +40,10 @@ foreach ($attendanceRecords as $record) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Dashboard | Al Huda School</title>
+    <title>Teachers Dashboard | Al Huda School</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="global.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
@@ -149,7 +150,7 @@ foreach ($attendanceRecords as $record) {
             </div>
             <div>
                 <h1 class="text-2xl font-black text-white tracking-tighter">AL HUDA</h1>
-                <p class="text-[9px] font-black text-purple-200 uppercase tracking-[0.3em] mt-1">Teacher Portal v2.0</p>
+                <p class="text-[9px] font-black text-purple-200 uppercase tracking-[0.3em] mt-1">Teachers Portal v2.0</p>
             </div>
         </div>
         
@@ -182,7 +183,7 @@ foreach ($attendanceRecords as $record) {
                     <h2 class="text-4xl font-black text-school-purple tracking-tighter uppercase leading-tight">Dashboard</h2>
                     <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] mt-1 flex items-center">
                         <span class="w-2 h-2 bg-school-orange rounded-full mr-2"></span>
-                        Teacher Oversight
+                        Teachers Oversight
                     </p>
                 </div>
             </div>
@@ -191,7 +192,7 @@ foreach ($attendanceRecords as $record) {
                     <p class="text-sm font-black text-school-purple uppercase tracking-widest leading-none"><?= explode(' ', $_SESSION['name'])[0] ?></p>
                     <p class="text-[9px] font-black text-school-orange uppercase tracking-widest mt-2 flex items-center justify-end">
                         <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
-                        Active Teacher
+                        Active Teachers
                     </p>
                 </div>
                 <div class="w-16 h-16 rounded-[1.8rem] bg-white p-1.5 border-2 border-school-purple/10 flex items-center justify-center shadow-lg">

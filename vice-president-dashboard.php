@@ -28,6 +28,7 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
     <title>VP Dashboard | Al Huda School</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="global.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
@@ -185,7 +186,7 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
                         <div class="p-8 bg-gray-50/50 rounded-[2.5rem] border border-gray-100 group hover:bg-white hover:shadow-xl transition-all duration-500">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <p class="text-lg font-black text-school-teal">Teacher Attendance</p>
+                                    <p class="text-lg font-black text-school-teal">Teachers Attendance</p>
                                     <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Average Daily Presence</p>
                                 </div>
                                 <span class="text-sm font-black text-green-500 bg-green-50 px-4 py-2 rounded-full">98% Avg</span>

@@ -94,6 +94,7 @@ if ($_SESSION['role'] === 'Teacher') {
     <title>Attendance Control | Al Huda</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="global.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
@@ -209,7 +210,7 @@ if ($_SESSION['role'] === 'Teacher') {
             </div>
             <div>
                 <h1 class="text-2xl font-black text-white tracking-tighter">AL HUDA</h1>
-                <p class="text-[9px] font-black text-purple-200 uppercase tracking-[0.3em] mt-1">Teacher Portal v2.0</p>
+                <p class="text-[9px] font-black text-purple-200 uppercase tracking-[0.3em] mt-1">Teachers Portal v2.0</p>
             </div>
         </div>
         

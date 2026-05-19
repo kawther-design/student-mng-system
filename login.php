@@ -52,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Login | Al Huda Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="global.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
@@ -177,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <select name="role" required class="w-full bg-transparent border-none rounded-[2.2rem] py-6 pl-16 pr-8 outline-none font-bold text-school-blue text-sm appearance-none cursor-pointer">
                         <option value="Admin">System Administrator</option>
                         <option value="Vice President">Vice President</option>
-                        <option value="Teacher">Teacher</option>
+                        <option value="Teacher">Teachers</option>
                         <option value="Parent">Parent / Guardian</option>
                     </select>
                     <div class="absolute right-7 pointer-events-none text-gray-300">
