@@ -345,7 +345,10 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
     </div>
 
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-accent/5">
+    <!-- Sidebar Overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 backdrop-blur-sm hidden transition-opacity duration-300" style="background-color: <?= $accentColor ?>20;"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-accent/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-school-accent rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-accent/20">
                 <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
@@ -357,7 +360,7 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
         
         <nav class="flex-1 space-y-3">
-            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
@@ -367,24 +370,24 @@ if ($_SESSION['role'] === 'Teacher') {
                 <i data-lucide="user-plus" class="w-5 h-5"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Student Registration</span>
             </a>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="users" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Teachers Registration</span>
             </a>
             <?php endif; ?>
 
             <?php if ($_SESSION['role'] === 'Admin'): ?>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Users</span>
             </a>
-            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="calendar-check" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Attendance</span>
             </a>
             <?php endif; ?>
 
-            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Exam & Results</span>
             </a>
@@ -399,52 +402,58 @@ if ($_SESSION['role'] === 'Teacher') {
     </aside>
 
     <main class="flex-1 lg:ml-72 w-full">
-        <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-10 h-24 flex items-center justify-between sticky top-0 z-30">
-            <div>
-                <h2 class="text-2xl font-black text-school-accent tracking-tighter uppercase">Academic Directory</h2>
-                <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Unified Student Record Management</p>
+        <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-6 md:px-10 h-24 flex items-center justify-between sticky top-0 z-30">
+            <div class="flex items-center space-x-4">
+                <!-- Hamburger Menu Button for mobile -->
+                <button type="button" id="sidebar-toggle" class="lg:hidden p-3 bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-100 flex items-center justify-center transition-all" style="color: <?= $accentColor ?>;">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-school-accent tracking-tighter uppercase leading-none">Academic Directory</h2>
+                    <p class="text-[9px] md:text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1.5">Unified Student Record Management</p>
+                </div>
             </div>
             <?php if ($_SESSION['role'] !== 'Teacher'): ?>
-            <button onclick="toggleModal()" class="bg-school-accent px-10 py-4 rounded-[1.5rem] flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-school-accent/20 hover:scale-105 transition-all">
+            <button onclick="toggleModal()" class="bg-school-accent px-6 md:px-10 py-4 rounded-[1.5rem] flex items-center space-x-3 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-school-accent/20 hover:scale-105 transition-all">
                 <i data-lucide="user-plus" class="w-4 h-4"></i>
-                <span>Enroll Student</span>
+                <span class="hidden md:inline">Enroll Student</span>
+                <span class="md:hidden">Enroll</span>
             </button>
             <?php endif; ?>
         </header>
 
-        <div class="px-10 py-6 relative z-40">
-            <div class="flex items-center space-x-6 pb-4">
-                <a href="manage-students.php" class="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all <?= !$currentFilter ? 'bg-school-accent text-white shadow-lg shadow-school-accent/30' : 'bg-white text-gray-400 hover:text-school-accent' ?>">
+        <div class="px-6 md:px-10 py-6 relative z-40">
+            <div class="flex items-center space-x-4 pb-4 overflow-x-auto w-full scrollbar-thin">
+                <a href="manage-students.php" class="px-6 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all <?= !$currentFilter ? 'bg-school-accent text-white shadow-lg shadow-school-accent/30' : 'bg-white text-gray-400 hover:text-school-accent border border-gray-100 whitespace-nowrap' ?>">
                     All Students
                 </a>
                 
                 <?php foreach ($groupedClasses as $baseForm => $subs): ?>
-                <div class="relative filter-group">
-                    <a href="manage-students.php?class_filter=<?= urlencode($baseForm) ?>" class="flex items-center space-x-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all <?= (strpos($currentFilter, $baseForm) === 0) ? 'bg-school-accent text-white shadow-lg shadow-school-accent/30' : 'bg-white text-gray-400 hover:text-school-accent' ?>">
-                        <span><?= $baseForm ?></span>
-                        <?php if (!empty($subs)): ?>
-                        <i data-lucide="chevron-down" class="w-3 h-3"></i>
-                        <?php endif; ?>
+                <div class="flex items-center bg-white rounded-[1.5rem] border border-gray-100 shadow-sm group <?= (strpos($currentFilter, $baseForm) === 0) ? 'ring-2 ring-school-accent/20' : '' ?>">
+                    <a href="manage-students.php?class_filter=<?= urlencode($baseForm) ?>" class="px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all rounded-l-[1.5rem] <?= ($currentFilter === $baseForm) ? 'bg-school-accent text-white shadow-lg shadow-school-accent/30' : 'text-gray-400 hover:text-school-accent' ?>">
+                        <?= $baseForm ?>
                     </a>
                     
-                    <?php if (!empty($subs)): ?>
-                    <div class="filter-dropdown mt-2">
-                        <?php foreach ($subs as $sub): ?>
-                        <a href="manage-students.php?class_filter=<?= urlencode($sub) ?>" class="block px-5 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-school-accent/5 <?= $currentFilter === $sub ? 'text-school-accent' : 'text-gray-400' ?>">
-                            <?= htmlspecialchars($sub) ?>
-                        </a>
-                        <?php endforeach; ?>
+                    <div class="relative flex items-center justify-center">
+                        <select onchange="if(this.value) location.href='manage-students.php?class_filter='+encodeURIComponent(this.value)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            <option value="<?= $baseForm ?>">All <?= $baseForm ?></option>
+                            <?php foreach ($subs as $sub): ?>
+                            <option value="<?= $sub ?>" <?= $currentFilter === $sub ? 'selected' : '' ?>><?= $sub ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="px-3 py-3 border-l border-gray-100 text-gray-400 group-hover:text-school-accent transition-all rounded-r-[1.5rem] <?= ($currentFilter !== $baseForm && strpos($currentFilter, $baseForm) === 0) ? 'bg-school-accent/10 text-school-accent' : '' ?>">
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </div>
                     </div>
-                    <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
             </div>
         </div>
 
-        <div class="p-10 pt-0">
-            <div class="bg-white rounded-[3rem] p-10 shadow-xl shadow-school-blue/5 border border-gray-50">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
+        <div class="p-6 md:p-10 pt-0">
+            <div class="bg-white rounded-[3rem] p-6 md:p-10 shadow-xl shadow-school-blue/5 border border-gray-50">
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left min-w-[1000px]">
                         <thead>
                             <tr class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] border-b border-gray-50">
                                 <th class="pb-8">Student Info</th>
@@ -505,6 +514,29 @@ if ($_SESSION['role'] === 'Teacher') {
 
     <script>
         lucide.createIcons();
+
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            const toggleSidebar = () => {
+                const isOpen = sidebar.classList.contains('translate-x-0');
+                if (isOpen) {
+                    sidebar.classList.remove('translate-x-0');
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                } else {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebar.classList.add('translate-x-0');
+                    sidebarOverlay.classList.remove('hidden');
+                }
+            };
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+        }
+
         function toggleModal() {
             const modal = document.getElementById('studentModal');
             if (modal.classList.contains('modal-hidden')) {

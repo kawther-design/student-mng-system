@@ -230,7 +230,10 @@ if ($_SESSION['role'] === 'Teacher') {
 </head>
 <body class="text-gray-800 flex min-h-screen">
 
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-accent/5">
+    <!-- Sidebar Overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 backdrop-blur-sm hidden transition-opacity duration-300" style="background-color: <?= $accentColor ?>20;"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-accent/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-school-accent rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-accent/20">
                 <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
@@ -242,28 +245,28 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
         
         <nav class="flex-1 space-y-3">
-            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
             
             <?php if ($_SESSION['role'] === 'Vice President'): ?>
-            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="user-plus" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Student Registration</span>
             </a>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="users" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Teachers Registration</span>
             </a>
             <?php endif; ?>
 
             <?php if ($_SESSION['role'] === 'Admin'): ?>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Users</span>
             </a>
-            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="calendar-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Attendance</span>
             </a>
@@ -284,12 +287,15 @@ if ($_SESSION['role'] === 'Teacher') {
     </aside>
 
     <main class="flex-1 lg:ml-72 w-full">
-        <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-10 h-24 flex items-center justify-between sticky top-0 z-30">
-            <div class="flex items-center space-x-6">
+        <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-6 md:px-10 h-24 flex items-center justify-between sticky top-0 z-30">
+            <div class="flex items-center space-x-4 md:space-x-6">
+                <button type="button" id="sidebar-toggle" class="lg:hidden p-3 bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-100 flex items-center justify-center transition-all" style="color: <?= $accentColor ?>;">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
                 <a href="manage-exams.php" class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 hover:bg-school-accent hover:text-white transition-all"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
                 <div>
-                    <h2 class="text-2xl font-black text-school-accent tracking-tighter uppercase"><?= $exam ? htmlspecialchars($exam->name) : 'Academic Results' ?> Control</h2>
-                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Manual Entry & Bulk Excel Import</p>
+                    <h2 class="text-lg md:text-2xl font-black text-school-accent tracking-tighter uppercase leading-none"><?= $exam ? htmlspecialchars($exam->name) : 'Academic Results' ?> Control</h2>
+                    <p class="text-[9px] md:text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1.5">Manual Entry & Bulk Excel Import</p>
                 </div>
             </div>
             
@@ -299,7 +305,8 @@ if ($_SESSION['role'] === 'Teacher') {
                     <input type="hidden" name="action" value="import_csv">
                     <label class="bg-school-accent px-6 py-4 rounded-2xl flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white cursor-pointer hover:scale-105 shadow-lg shadow-school-accent/20 transition-all">
                         <i data-lucide="file-up" class="w-4 h-4"></i>
-                        <span>Import Excel (CSV)</span>
+                        <span class="hidden md:inline">Import Excel (CSV)</span>
+                        <span class="md:hidden">Import</span>
                         <input type="file" name="csv_file" class="hidden" onchange="this.form.submit()">
                     </label>
                 </form>
@@ -307,7 +314,7 @@ if ($_SESSION['role'] === 'Teacher') {
             <?php endif; ?>
         </header>
 
-        <div class="p-10">
+        <div class="p-6 md:p-10">
             <div class="bg-white rounded-[4rem] p-10 shadow-xl shadow-school-accent/5 border border-gray-50 mb-10">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div>
@@ -414,6 +421,30 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
     </main>
 
-    <script>lucide.createIcons();</script>
+    <script>
+        lucide.createIcons();
+
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            const toggleSidebar = () => {
+                const isOpen = sidebar.classList.contains('translate-x-0');
+                if (isOpen) {
+                    sidebar.classList.remove('translate-x-0');
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                } else {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebar.classList.add('translate-x-0');
+                    sidebarOverlay.classList.remove('hidden');
+                }
+            };
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+        }
+    </script>
 </body>
 </html>

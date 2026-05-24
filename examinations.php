@@ -21,6 +21,13 @@
                     <p class="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em]">Enter your unique Student ID to view your academic transcript</p>
                 </div>
 
+                <?php if (isset($_GET['pwd_msg'])): ?>
+                <div class="mb-8 p-6 bg-green-50 text-green-600 rounded-[2.5rem] flex items-center justify-center border border-green-100">
+                    <i data-lucide="check-circle" class="w-6 h-6 mr-4"></i>
+                    <span class="text-xs font-black uppercase tracking-widest"><?= htmlspecialchars($_GET['pwd_msg']) ?></span>
+                </div>
+                <?php endif; ?>
+
                 <form method="POST" autocomplete="off" class="relative z-10 flex flex-col space-y-10 mb-16">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div class="space-y-4">
@@ -56,14 +63,82 @@
                     $student = $studentColl->findOne(['student_id' => $student_id_raw]);
                     
                     if ($student):
-                        // Simple Logic: Password matches ID, Phone, or default 1234
-                        $is_valid = ($password_raw === '1234') || ($password_raw === $student->student_id) || ($password_raw === ($student->student_phone ?? ''));
+                        // Enhanced Logic: Check hashed password or fallback to defaults
+                        $is_valid = false;
+                        if (isset($student->password)) {
+                            $is_valid = password_verify($password_raw, $student->password);
+                        } else {
+                            $is_valid = ($password_raw === '1234') || ($password_raw === $student->student_id) || ($password_raw === ($student->student_phone ?? ''));
+                        }
+
+                        $msg = '';
+                        if ($is_valid && isset($_POST['action']) && $_POST['action'] === 'update_password') {
+                            $new_password = $_POST['new_password'] ?? '';
+                            $confirm_password = $_POST['confirm_password'] ?? '';
+                            
+                            if (!empty($new_password) && $new_password === $confirm_password) {
+                                $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+                                $studentColl->updateOne(
+                                    ['student_id' => $student_id_raw],
+                                    ['$set' => ['password' => $hashed_password]]
+                                );
+                                header('Location: examinations.php?pwd_msg=' . urlencode('Password successfully updated! Please login with your new password.'));
+                                exit;
+                            } else {
+                                $msg = '<div class="p-4 mb-8 bg-red-50 text-red-500 border border-red-200 rounded-3xl text-center font-black text-xs uppercase tracking-widest flex items-center justify-center space-x-2"><i data-lucide="alert-circle" class="w-4 h-4"></i><span>Passwords do not match or empty!</span></div>';
+                            }
+                        }
                         
                         if ($is_valid):
                             $resultsColl = $database->getCollection('results');
                             $examColl = $database->getCollection('exams');
                             $results = $resultsColl->find(['student_id' => (string)$student->_id])->toArray();
                             
+                            // Password Update Form UI
+                            ?>
+                            <div class="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-xl shadow-school-blue/5 mb-12 relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-gradient-to-br from-school-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-xl font-black text-school-blue uppercase tracking-tighter flex items-center">
+                                            <div class="w-10 h-10 bg-school-blue/10 rounded-xl flex items-center justify-center mr-4">
+                                                <i data-lucide="key" class="w-5 h-5 text-school-blue"></i>
+                                            </div>
+                                            Security Settings
+                                        </h4>
+                                        <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1 ml-14">Update your account password</p>
+                                    </div>
+                                </div>
+                                
+                                <?= $msg ?>
+
+                                <form id="pwd-form" method="POST" class="mt-8 space-y-6 pt-8 border-t border-gray-100">
+                                    <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id_raw) ?>">
+                                    <input type="hidden" name="password" value="<?= htmlspecialchars($password_raw) ?>">
+                                    <input type="hidden" name="action" value="update_password">
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-[10px] font-black text-school-blue uppercase tracking-[0.4em] ml-4 mb-2">New Password</label>
+                                            <div class="relative w-full">
+                                                <i data-lucide="lock" class="absolute left-6 top-1/2 -translate-y-1/2 text-school-blue w-4 h-4"></i>
+                                                <input type="password" name="new_password" required placeholder="••••••••" class="w-full bg-gray-50 border-2 border-transparent focus:border-school-blue rounded-[1.5rem] py-4 pl-14 pr-6 outline-none text-sm font-black text-school-blue transition-all placeholder:text-gray-300">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-black text-school-blue uppercase tracking-[0.4em] ml-4 mb-2">Confirm Password</label>
+                                            <div class="relative w-full">
+                                                <i data-lucide="lock-keyhole" class="absolute left-6 top-1/2 -translate-y-1/2 text-school-blue w-4 h-4"></i>
+                                                <input type="password" name="confirm_password" required placeholder="••••••••" class="w-full bg-gray-50 border-2 border-transparent focus:border-school-blue rounded-[1.5rem] py-4 pl-14 pr-6 outline-none text-sm font-black text-school-blue transition-all placeholder:text-gray-300">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="py-4 px-8 bg-school-blue text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest shadow-lg shadow-school-blue/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center">
+                                        <i data-lucide="save" class="w-4 h-4 mr-2"></i> Update Password
+                                    </button>
+                                </form>
+                            </div>
+                            <?php
                             if (!empty($results)):
                 ?>
                             <div class="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
@@ -142,5 +217,11 @@
             </div>
         </div>
     </section>
+
+    <script>
+        if ( window.history.replaceState ) {
+            window.history.replaceState( null, null, window.location.href );
+        }
+    </script>
 
 <?php include 'footer.php'; ?>

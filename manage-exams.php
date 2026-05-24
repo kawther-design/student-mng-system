@@ -162,9 +162,10 @@ if ($_SESSION['role'] === 'Teacher') {
         }
     </style>
 </head>
-<body class="bg-school-bg text-gray-800 flex min-h-screen">
+    <!-- Sidebar Overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 backdrop-blur-sm hidden transition-opacity duration-300" style="background-color: <?= $accentColor ?>20;"></div>
 
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-accent/5">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-accent/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-school-accent rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-accent/20">
                 <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
@@ -176,28 +177,28 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
         
         <nav class="flex-1 space-y-3">
-            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
             
             <?php if ($_SESSION['role'] === 'Vice President'): ?>
-            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="user-plus" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Student Registration</span>
             </a>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="users" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Teachers Registration</span>
             </a>
             <?php endif; ?>
 
             <?php if ($_SESSION['role'] === 'Admin'): ?>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Users</span>
             </a>
-            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="calendar-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Attendance</span>
             </a>
@@ -217,10 +218,17 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
     </aside>
 
-    <main class="flex-1 lg:ml-72 w-full p-10">
-        <header class="mb-12">
-            <h2 class="text-4xl font-black text-school-accent tracking-tighter uppercase">Results Center</h2>
-            <p class="text-xs text-gray-400 font-black uppercase tracking-[0.3em] mt-1">Direct Excel Import Portal</p>
+    <main class="flex-1 lg:ml-72 w-full p-6 md:p-10">
+        <header class="flex flex-col md:flex-row md:justify-between md:items-center mb-12 gap-6">
+            <div class="flex items-center space-x-4">
+                <button type="button" id="sidebar-toggle" class="lg:hidden p-3 bg-white hover:bg-gray-50 rounded-2xl shadow-md border border-gray-100 flex items-center justify-center transition-all" style="color: <?= $accentColor ?>;">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div>
+                    <h2 class="text-2xl md:text-4xl font-black text-school-accent tracking-tighter uppercase leading-none">Results Center</h2>
+                    <p class="text-[9px] md:text-xs text-gray-400 font-black uppercase tracking-[0.3em] mt-2">Direct Excel Import Portal</p>
+                </div>
+            </div>
         </header>
 
         <?php if ($msg): ?>
@@ -302,6 +310,30 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
     </main>
 
-    <script>lucide.createIcons();</script>
+    <script>
+        lucide.createIcons();
+
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            const toggleSidebar = () => {
+                const isOpen = sidebar.classList.contains('translate-x-0');
+                if (isOpen) {
+                    sidebar.classList.remove('translate-x-0');
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                } else {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebar.classList.add('translate-x-0');
+                    sidebarOverlay.classList.remove('hidden');
+                }
+            };
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+        }
+    </script>
 </body>
 </html>

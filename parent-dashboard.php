@@ -23,7 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'])) {
     $student = $studentColl->findOne(['student_id' => $student_id_raw]);
     
     if ($student) {
-        $is_valid = ($password_raw === '1234') || ($password_raw === $student->student_id) || ($password_raw === ($student->student_phone ?? ''));
+        $is_valid = false;
+        if (isset($student->password)) {
+            $is_valid = password_verify($password_raw, $student->password);
+        } else {
+            $is_valid = ($password_raw === '1234') || ($password_raw === $student->student_id) || ($password_raw === ($student->student_phone ?? ''));
+        }
         if ($is_valid) {
             $search_student = $student;
             // Fetch Attendance
@@ -107,7 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'])) {
     </style>
 </head>
 <body class="text-gray-800 flex min-h-screen">
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-coral/5">
+    <!-- Sidebar Overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 bg-school-coral/20 backdrop-blur-sm hidden transition-opacity duration-300"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-coral/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-school-coral rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-coral/20">
                 <i data-lucide="heart" class="text-white w-7 h-7"></i>
@@ -126,21 +134,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'])) {
         </nav>
 
         <div class="pt-8 border-t border-gray-100">
-            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-coral hover:bg-school-coral/5 transition-all group">
+            <a href="login.php" class="flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-coral transition-all group">
                 <i data-lucide="log-out" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Sign Out</span>
             </a>
         </div>
     </aside>
 
-    <main class="flex-1 lg:ml-72 p-10">
-        <header class="flex justify-between items-center mb-10">
-            <div>
-                <h2 class="text-3xl font-black text-school-coral tracking-tighter uppercase">Welcome, <?= explode(' ', $_SESSION['name'])[0] ?></h2>
-                <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mt-1">Parent Portal | My Children Tracking</p>
+    <main class="flex-1 lg:ml-72 p-6 md:p-10">
+        <header class="flex flex-col md:flex-row md:justify-between md:items-center mb-10 gap-6">
+            <div class="flex items-center space-x-4">
+                <!-- Hamburger Menu Button for mobile -->
+                <button id="sidebar-toggle" class="lg:hidden p-3 bg-white hover:bg-gray-50 rounded-2xl shadow-md border border-orange-100 flex items-center justify-center text-school-coral transition-all">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-black text-school-coral tracking-tighter uppercase leading-none">Welcome, <?= explode(' ', $_SESSION['name'])[0] ?></h2>
+                    <p class="text-[9px] md:text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mt-1.5">Parent Portal | My Children Tracking</p>
+                </div>
             </div>
-            <div class="w-14 h-14 rounded-[1.5rem] bg-school-coral/10 p-1 border-2 border-school-coral/10 flex items-center justify-center text-school-coral">
-                <i data-lucide="user" class="w-7 h-7"></i>
+            <div class="flex items-center justify-between md:justify-end space-x-6 bg-white md:bg-transparent p-4 md:p-0 rounded-3xl border border-orange-100/50 md:border-none shadow-sm md:shadow-none">
+                <div class="text-right">
+                    <p class="text-sm font-black text-school-coral uppercase tracking-widest leading-none"><?= explode(' ', $_SESSION['name'])[0] ?></p>
+                    <p class="text-[9px] font-black text-school-coral uppercase tracking-widest mt-2 flex items-center justify-end">
+                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
+                        Active Parent
+                    </p>
+                </div>
+                <div class="w-12 h-12 md:w-14 md:h-14 rounded-[1.2rem] md:rounded-[1.5rem] bg-school-coral/10 p-1 border-2 border-school-coral/10 flex items-center justify-center text-school-coral shadow-lg">
+                    <i data-lucide="user" class="w-6 h-6 md:w-7 md:h-7"></i>
+                </div>
             </div>
         </header>
 
@@ -385,6 +408,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'])) {
             </div>
         <?php endif; ?>
     </main>
-    <script>lucide.createIcons();</script>
+    <script>
+        lucide.createIcons();
+
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            const toggleSidebar = () => {
+                const isOpen = sidebar.classList.contains('translate-x-0');
+                if (isOpen) {
+                    sidebar.classList.remove('translate-x-0');
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                } else {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebar.classList.add('translate-x-0');
+                    sidebarOverlay.classList.remove('hidden');
+                }
+            };
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+        }
+    </script>
 </body>
 </html>

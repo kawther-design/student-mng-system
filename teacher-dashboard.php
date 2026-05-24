@@ -143,7 +143,10 @@ foreach ($attendanceRecords as $record) {
     <div class="decorative-blob top-[-200px] right-[-200px]"></div>
     <div class="decorative-blob bottom-[-200px] left-[100px]"></div>
 
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-gradient-to-b from-school-purple to-purple-900 border-none flex flex-col p-8 shadow-2xl shadow-purple-900/30">
+    <!-- Sidebar Overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 bg-school-purple/20 backdrop-blur-sm hidden transition-opacity duration-300"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-school-purple to-purple-900 border-none flex flex-col p-8 shadow-2xl shadow-purple-900/30 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-white rounded-[1.2rem] flex items-center justify-center shadow-xl">
                 <i data-lucide="presentation" class="text-school-purple w-7 h-7"></i>
@@ -173,30 +176,34 @@ foreach ($attendanceRecords as $record) {
         </div>
     </aside>
 
-    <main class="flex-1 lg:ml-72 p-10 animate-in">
-        <header class="flex justify-between items-center mb-16">
+    <main class="flex-1 lg:ml-72 p-6 md:p-10 animate-in">
+        <header class="flex flex-col md:flex-row md:justify-between md:items-center mb-16 gap-6">
             <div class="flex items-center space-x-6">
-                <div class="w-16 h-16 bg-gradient-to-br from-school-purple to-purple-800 rounded-[1.8rem] flex items-center justify-center shadow-2xl shadow-school-purple/30 group">
-                    <i data-lucide="presentation" class="text-white w-8 h-8 group-hover:scale-110 transition-transform"></i>
+                <!-- Hamburger Menu Button for mobile -->
+                <button id="sidebar-toggle" class="lg:hidden p-3 bg-white hover:bg-gray-50 rounded-2xl shadow-md border border-purple-100 flex items-center justify-center text-school-purple transition-all">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-school-purple to-purple-800 rounded-[1.2rem] md:rounded-[1.8rem] flex items-center justify-center shadow-2xl shadow-school-purple/30 group">
+                    <i data-lucide="presentation" class="text-white w-6 h-6 md:w-8 md:h-8 group-hover:scale-110 transition-transform"></i>
                 </div>
                 <div>
-                    <h2 class="text-4xl font-black text-school-purple tracking-tighter uppercase leading-tight">Dashboard</h2>
-                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] mt-1 flex items-center">
+                    <h2 class="text-2xl md:text-4xl font-black text-school-purple tracking-tighter uppercase leading-none">Dashboard</h2>
+                    <p class="text-[9px] md:text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] mt-1.5 flex items-center">
                         <span class="w-2 h-2 bg-school-orange rounded-full mr-2"></span>
                         Teachers Oversight
                     </p>
                 </div>
             </div>
-            <div class="flex items-center space-x-6">
-                <div class="text-right">
+            <div class="flex items-center justify-between md:justify-end space-x-6 bg-white md:bg-transparent p-4 md:p-0 rounded-3xl border border-purple-100/50 md:border-none shadow-sm md:shadow-none">
+                <div class="text-left md:text-right">
                     <p class="text-sm font-black text-school-purple uppercase tracking-widest leading-none"><?= explode(' ', $_SESSION['name'])[0] ?></p>
-                    <p class="text-[9px] font-black text-school-orange uppercase tracking-widest mt-2 flex items-center justify-end">
+                    <p class="text-[9px] font-black text-school-orange uppercase tracking-widest mt-2 flex items-center md:justify-end">
                         <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
                         Active Teachers
                     </p>
                 </div>
-                <div class="w-16 h-16 rounded-[1.8rem] bg-white p-1.5 border-2 border-school-purple/10 flex items-center justify-center shadow-lg">
-                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['name']) ?>&background=8B5CF6&color=fff" class="w-full h-full rounded-[1.4rem]" alt="">
+                <div class="w-12 h-12 md:w-16 md:h-16 rounded-[1.4rem] md:rounded-[1.8rem] bg-white p-1.5 border-2 border-school-purple/10 flex items-center justify-center shadow-lg">
+                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['name']) ?>&background=8B5CF6&color=fff" class="w-full h-full rounded-[1rem] md:rounded-[1.4rem]" alt="">
                 </div>
             </div>
         </header>
@@ -389,6 +396,29 @@ foreach ($attendanceRecords as $record) {
 
     <script>
         lucide.createIcons();
+
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            const toggleSidebar = () => {
+                const isOpen = sidebar.classList.contains('translate-x-0');
+                if (isOpen) {
+                    sidebar.classList.remove('translate-x-0');
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                } else {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebar.classList.add('translate-x-0');
+                    sidebarOverlay.classList.remove('hidden');
+                }
+            };
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+        }
+
         function openStatusModal(status) {
             const url = new URL(window.location);
             url.searchParams.set('view', status);

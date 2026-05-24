@@ -94,6 +94,31 @@ if ($_SESSION['role'] === 'Teacher') {
     $dashboardUrl = 'vice-president-dashboard.php';
     $accentColor = '#1DBF92'; // Teal for VP
 }
+// Module-specific sidebar background for admin modules
+$moduleBgClass = '';
+$scriptName = basename(__FILE__);
+if ($scriptName === 'manage-users.php') {
+    $moduleBgClass = 'bg-school-purple';
+} elseif ($scriptName === 'manage-attendance.php') {
+    $moduleBgClass = 'bg-school-teal';
+} elseif (in_array($scriptName, ['manage-exams.php', 'manage-results.php'])) {
+    $moduleBgClass = 'bg-school-coral';
+}
+if (!empty($moduleBgClass)) {
+    $sidebarBgClass = $moduleBgClass;
+}
+?>
+// Determine sidebar background class based on role
+$role = $_SESSION['role'] ?? 'Admin';
+if ($role === 'Teacher') {
+    $sidebarBgClass = 'bg-school-purple';
+} elseif ($role === 'Parent') {
+    $sidebarBgClass = 'bg-school-coral';
+} elseif ($role === 'Vice President') {
+    $sidebarBgClass = 'bg-school-teal';
+} else {
+    $sidebarBgClass = 'bg-school-blue';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -304,7 +329,10 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
     </div>
 
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-accent/5">
+    <!-- Sidebar Overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 backdrop-blur-sm hidden transition-opacity duration-300" style="background-color: <?= $accentColor ?>20;"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 <?= $sidebarBgClass ?> border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-accent/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-school-accent rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-accent/20">
                 <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
@@ -316,13 +344,13 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
         
         <nav class="flex-1 space-y-3">
-            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
             
             <?php if ($_SESSION['role'] === 'Vice President'): ?>
-            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="user-plus" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Student Registration</span>
             </a>
@@ -337,13 +365,13 @@ if ($_SESSION['role'] === 'Teacher') {
                 <i data-lucide="shield-check" class="w-5 h-5"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Users</span>
             </a>
-            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="calendar-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Attendance</span>
             </a>
             <?php endif; ?>
 
-            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Exam & Results</span>
             </a>
@@ -358,21 +386,35 @@ if ($_SESSION['role'] === 'Teacher') {
     </aside>
 
     <main class="flex-1 lg:ml-72 w-full">
-        <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-10 h-24 flex items-center justify-between sticky top-0 z-30">
-            <div>
-                <h2 class="text-2xl font-black text-school-accent tracking-tighter uppercase"><?= $_SESSION['role'] === 'Vice President' ? 'Faculty Registry' : 'User Repository' ?></h2>
-                <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1"><?= $_SESSION['role'] === 'Vice President' ? 'Academic Staff Management' : 'Manage Faculty, Admin & Parents' ?></p>
+        <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-6 md:px-10 h-24 flex items-center justify-between sticky top-0 z-30">
+            <div class="flex items-center space-x-4">
+                <!-- Hamburger Menu Button for mobile -->
+                <button type="button" id="sidebar-toggle" class="lg:hidden p-3 bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-100 flex items-center justify-center transition-all" style="color: <?= $accentColor ?>;">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-school-accent tracking-tighter uppercase leading-none"><?= $_SESSION['role'] === 'Vice President' ? 'Faculty Registry' : 'User Repository' ?></h2>
+                    <p class="text-[9px] md:text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1.5"><?= $_SESSION['role'] === 'Vice President' ? 'Academic Staff Management' : 'Manage Faculty, Admin & Parents' ?></p>
+                </div>
             </div>
-            
-            <div class="flex items-center space-x-6 flex-1 max-w-4xl mx-12">
+
+            <button onclick="toggleModal()" class="bg-school-accent px-6 md:px-10 py-4 rounded-[1.5rem] flex items-center space-x-3 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-school-accent/20 hover:scale-105 transition-all">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                <span class="hidden md:inline">Register User</span>
+                <span class="md:hidden">Register</span>
+            </button>
+        </header>
+
+        <div class="p-6 md:p-10">
+            <div class="flex flex-col md:flex-row items-stretch md:items-center space-y-4 md:space-y-0 md:space-x-6 mb-8">
                 <div class="relative flex-1 group">
                     <i data-lucide="search" class="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-school-accent transition-colors"></i>
-                    <input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search by name, role or username..." class="w-full bg-gray-50 border-none rounded-2xl py-4 pl-14 pr-6 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5 transition-all">
+                    <input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search by name, role or username..." class="w-full bg-white border border-gray-100 rounded-2xl py-4 pl-14 pr-6 outline-none text-sm font-bold text-school-accent focus:ring-2 focus:ring-school-accent/5 shadow-sm transition-all">
                 </div>
                 
-                <div class="relative w-64 group">
+                <div class="relative w-full md:w-64 group">
                     <i data-lucide="filter" class="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-school-accent transition-colors"></i>
-                    <select id="roleFilter" onchange="filterUsers()" class="w-full bg-gray-50 border-none rounded-2xl py-4 pl-14 pr-10 outline-none text-sm font-bold text-school-accent appearance-none focus:ring-2 focus:ring-school-accent/5 transition-all cursor-pointer">
+                    <select id="roleFilter" onchange="filterUsers()" class="w-full bg-white border border-gray-100 rounded-2xl py-4 pl-14 pr-10 outline-none text-sm font-bold text-school-accent appearance-none focus:ring-2 focus:ring-school-accent/5 shadow-sm transition-all cursor-pointer">
                         <option value="">All Roles</option>
                         <option value="Admin">Administrators</option>
                         <option value="Teacher">Academic Teachers</option>
@@ -383,15 +425,8 @@ if ($_SESSION['role'] === 'Teacher') {
                 </div>
             </div>
 
-            <button onclick="toggleModal()" class="bg-school-accent px-10 py-4 rounded-[1.5rem] flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-school-accent/20 hover:scale-105 transition-all">
-                <i data-lucide="user-plus" class="w-4 h-4"></i>
-                <span>Register User</span>
-            </button>
-        </header>
-
-        <div class="p-10">
-            <div class="bg-white rounded-[3rem] shadow-2xl shadow-school-accent/5 border border-gray-100 overflow-hidden">
-                <table class="w-full text-left border-collapse" id="userTable">
+            <div class="bg-white rounded-[3rem] shadow-2xl shadow-school-accent/5 border border-gray-100 overflow-x-auto w-full">
+                <table class="w-full text-left border-collapse min-w-[800px]" id="userTable">
                     <thead>
                         <tr class="bg-gray-50/50 border-b border-gray-100">
                             <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">User Profile</th>

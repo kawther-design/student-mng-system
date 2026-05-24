@@ -164,7 +164,53 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </nav>
 
         <a href="login.php"
-            class="bg-school-blue text-white px-10 py-4 rounded-full font-black text-[11px] uppercase tracking-[0.2em] hover:bg-opacity-90 transition-all shadow-xl shadow-school-blue/20">
+            class="hidden md:inline-block bg-school-blue text-white px-10 py-4 rounded-full font-black text-[11px] uppercase tracking-[0.2em] hover:bg-opacity-90 transition-all shadow-xl shadow-school-blue/20">
             LOGIN
         </a>
+
+        <!-- Mobile Menu Trigger -->
+        <button id="mobile-menu-btn" class="md:hidden w-12 h-12 bg-white rounded-2xl border border-gray-100 flex items-center justify-center text-school-blue shadow-md hover:scale-105 active:scale-95 transition-all">
+            <i id="menu-icon" data-lucide="menu" class="w-6 h-6"></i>
+        </button>
     </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-nav" class="fixed inset-0 z-40 bg-white/95 backdrop-blur-2xl hidden flex flex-col items-center justify-center px-10 transition-all duration-300 opacity-0 pointer-events-none">
+        <nav class="flex flex-col items-center space-y-8 text-center w-full max-w-sm mb-10">
+            <a href="index.php" class="text-xl font-black text-school-blue tracking-widest uppercase hover:text-school-teal transition-colors <?= ($current_page == 'index.php') ? 'text-school-teal' : '' ?>">HOME</a>
+            <a href="academics.php" class="text-xl font-black text-school-blue tracking-widest uppercase hover:text-school-teal transition-colors <?= ($current_page == 'academics.php') ? 'text-school-teal' : '' ?>">ACADEMICS</a>
+            <a href="examinations.php" class="text-xl font-black text-school-blue tracking-widest uppercase hover:text-school-teal transition-colors <?= ($current_page == 'examinations.php') ? 'text-school-teal' : '' ?>">EXAMINATIONS</a>
+            <a href="features.php" class="text-xl font-black text-school-blue tracking-widest uppercase hover:text-school-teal transition-colors <?= ($current_page == 'features.php') ? 'text-school-teal' : '' ?>">FEATURES</a>
+            <a href="contact.php" class="text-xl font-black text-school-blue tracking-widest uppercase hover:text-school-teal transition-colors <?= ($current_page == 'contact.php') ? 'text-school-teal' : '' ?>">CONTACT US</a>
+        </nav>
+        <a href="login.php"
+            class="w-full text-center bg-school-blue text-white py-5 rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-school-blue/20 hover:bg-opacity-90 transition-all">
+            LOGIN TO PORTAL
+        </a>
+    </div>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileNav = document.getElementById('mobile-nav');
+        const menuIcon = document.getElementById('menu-icon');
+
+        if (mobileMenuBtn && mobileNav) {
+            mobileMenuBtn.addEventListener('click', () => {
+                const isHidden = mobileNav.classList.contains('hidden');
+                if (isHidden) {
+                    mobileNav.classList.remove('hidden');
+                    setTimeout(() => {
+                        mobileNav.classList.remove('opacity-0', 'pointer-events-none');
+                    }, 50);
+                    menuIcon.setAttribute('data-lucide', 'x');
+                } else {
+                    mobileNav.classList.add('opacity-0', 'pointer-events-none');
+                    setTimeout(() => {
+                        mobileNav.classList.add('hidden');
+                    }, 300);
+                    menuIcon.setAttribute('data-lucide', 'menu');
+                }
+                lucide.createIcons();
+            });
+        }
+    </script>

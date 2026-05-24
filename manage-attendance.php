@@ -15,13 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $form = $_POST['form'];
     
     foreach ($_POST['attendance'] as $studentId => $status) {
+        $studentForm = $_POST['student_forms'][$studentId] ?? $form;
         $collection->updateOne(
             ['student_id' => $studentId, 'date' => $date],
             ['$set' => [
                 'student_id' => $studentId,
                 'student_name' => $_POST['student_names'][$studentId],
                 'date' => $date,
-                'form' => $form,
+                'form' => $studentForm,
                 'status' => $status,
                 'marked_by' => $_SESSION['name'],
                 'updated_at' => new MongoDB\BSON\UTCDateTime()
@@ -38,7 +39,14 @@ $form = isset($_GET['form']) ? $_GET['form'] : 'FORM 1 A';
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 
 $studentColl = $database->getCollection('students');
-$students = $studentColl->find(['form' => new MongoDB\BSON\Regex('^' . preg_quote($form, '/') . '$', 'i')], ['sort' => ['name' => 1]])->toArray();
+
+if (in_array($form, ['FORM 1', 'FORM 2', 'FORM 3', 'FORM 4'])) {
+    $regexPattern = '^' . preg_quote($form, '/') . '.*';
+} else {
+    $regexPattern = '^' . preg_quote($form, '/') . '$';
+}
+
+$students = $studentColl->find(['form' => new MongoDB\BSON\Regex($regexPattern, 'i')], ['sort' => ['name' => 1]])->toArray();
 
 // Hardcode all possible classes (Forms 1-4, Sections A-E)
 $allClasses = [];
@@ -50,10 +58,19 @@ foreach (['FORM 1', 'FORM 2', 'FORM 3', 'FORM 4'] as $baseForm) {
 
 // Fetch existing attendance for the date
 $attColl = $database->getCollection('attendance');
-$existingAtt = $attColl->find(['form' => new MongoDB\BSON\Regex('^' . preg_quote($form, '/') . '$', 'i'), 'date' => $date])->toArray();
+$existingAtt = $attColl->find(['form' => new MongoDB\BSON\Regex($regexPattern, 'i'), 'date' => $date])->toArray();
 $attStatus = [];
 foreach ($existingAtt as $record) {
     $attStatus[$record->student_id] = $record->status;
+}
+
+$statusFilter = $_GET['status_filter'] ?? '';
+if ($statusFilter) {
+    $students = array_filter($students, function($student) use ($attStatus, $statusFilter) {
+        $s_id = (string)$student->_id;
+        $status = isset($attStatus[$s_id]) ? $attStatus[$s_id] : 'Present';
+        return $status === $statusFilter;
+    });
 }
 
 // Fetch history if requested
@@ -202,8 +219,11 @@ if ($_SESSION['role'] === 'Teacher') {
     </div>
     <?php endif; ?>
 
+    <!-- Sidebar Overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 backdrop-blur-sm hidden transition-opacity duration-300" style="background-color: <?= $accentColor ?>20;"></div>
+
     <?php if ($_SESSION['role'] === 'Teacher'): ?>
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-gradient-to-b from-school-purple to-purple-900 border-none hidden lg:flex flex-col p-8 shadow-2xl shadow-purple-900/30">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-school-purple to-purple-900 border-none flex flex-col p-8 shadow-2xl shadow-purple-900/30 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-white rounded-[1.2rem] flex items-center justify-center shadow-xl">
                 <i data-lucide="presentation" class="text-school-purple w-7 h-7"></i>
@@ -233,7 +253,7 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
     </aside>
     <?php else: ?>
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-accent/5">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-accent/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-school-accent rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-accent/20">
                 <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
@@ -245,24 +265,24 @@ if ($_SESSION['role'] === 'Teacher') {
         </div>
         
         <nav class="flex-1 space-y-3">
-            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="<?= $dashboardUrl ?>" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Dashboard</span>
             </a>
             
             <?php if ($_SESSION['role'] === 'Vice President'): ?>
-            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-students.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="user-plus" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Student Registration</span>
             </a>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="users" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Teachers Registration</span>
             </a>
             <?php endif; ?>
 
             <?php if ($_SESSION['role'] === 'Admin'): ?>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="shield-check" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Users</span>
             </a>
@@ -273,14 +293,14 @@ if ($_SESSION['role'] === 'Teacher') {
             <?php endif; ?>
 
             <?php if ($_SESSION['role'] !== 'Teacher' && $_SESSION['role'] !== 'Vice President'): ?>
-            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
                 <span class="font-bold text-sm">Exam & Results</span>
             </a>
             <?php endif; ?>
 
             <?php if ($_SESSION['role'] === 'Vice President'): ?>
-            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-accent hover:bg-school-accent/5 transition-all">
+            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-accent transition-all">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Exam & Results</span>
             </a>
@@ -301,33 +321,39 @@ if ($_SESSION['role'] === 'Teacher') {
             <input type="hidden" name="action" value="save_attendance">
             <input type="hidden" name="date" value="<?= $date ?>">
             <input type="hidden" name="form" value="<?= $form ?>">
-            <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-10 h-24 flex items-center justify-between sticky top-0 z-30">
-                <div>
-                    <h2 class="text-2xl font-black text-school-accent tracking-tighter uppercase">Attendance Registry</h2>
-                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Daily Student Presence</p>
+            <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-6 md:px-10 h-24 flex items-center justify-between sticky top-0 z-30">
+                <div class="flex items-center space-x-4">
+                    <button type="button" id="sidebar-toggle" class="lg:hidden p-3 bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-100 flex items-center justify-center transition-all" style="color: <?= $accentColor ?>;">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-black text-school-accent tracking-tighter uppercase leading-none">Attendance</h2>
+                        <p class="text-[9px] md:text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Daily Student Registry</p>
+                    </div>
                 </div>
-                <button type="submit" name="save" class="px-10 py-4 bg-school-accent text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest shadow-xl shadow-school-accent/20 hover:scale-105 transition-all">
+                <button type="submit" name="save" class="px-6 md:px-10 py-4 bg-school-accent text-white rounded-[1.5rem] text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-xl shadow-school-accent/20 hover:scale-105 transition-all">
                     <i data-lucide="save" class="w-4 h-4 inline-block mr-2"></i>
-                    Save Attendance
+                    Save
                 </button>
             </header>
 
             <div class="p-8">
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-10">
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-10">
                     <div class="lg:col-span-2 bg-white p-8 rounded-[3rem] shadow-xl shadow-school-blue/5 border border-gray-50 flex items-center justify-between">
                         <div class="flex items-center space-x-6">
                             <div>
                                 <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 px-1">Selected Class</span>
                                 <select onchange="location.href='?form='+this.value+'&date=<?= $date ?>'" class="bg-gray-50 border-none rounded-2xl py-4 px-8 text-sm font-black text-school-accent uppercase tracking-tighter outline-none cursor-pointer hover:bg-gray-100 transition-all">
                                     <?php foreach (['FORM 1', 'FORM 2', 'FORM 3', 'FORM 4'] as $baseForm): ?>
-                                        <optgroup label="<?= $baseForm ?>">
-                                            <?php foreach (['A', 'B', 'C', 'D', 'E'] as $section): ?>
-                                                <?php $className = $baseForm . ' ' . $section; ?>
-                                                <option value="<?= htmlspecialchars($className) ?>" <?= $form === $className ? 'selected' : '' ?>>
-                                                    <?= htmlspecialchars($className) ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </optgroup>
+                                        <option value="<?= htmlspecialchars($baseForm) ?>" <?= $form === $baseForm ? 'selected' : '' ?> class="font-black text-school-blue bg-school-blue/5">
+                                            <?= htmlspecialchars($baseForm) ?> (All Sections)
+                                        </option>
+                                        <?php foreach (['A', 'B', 'C', 'D', 'E'] as $section): ?>
+                                            <?php $className = $baseForm . ' ' . $section; ?>
+                                            <option value="<?= htmlspecialchars($className) ?>" <?= $form === $className ? 'selected' : '' ?>>
+                                                &nbsp;&nbsp;&nbsp;<?= htmlspecialchars($className) ?>
+                                            </option>
+                                        <?php endforeach; ?>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -339,7 +365,7 @@ if ($_SESSION['role'] === 'Teacher') {
                         </div>
                     </div>
 
-                    <div class="bg-white p-8 rounded-[3rem] shadow-xl shadow-school-blue/5 border border-gray-50 flex items-center space-x-6">
+                    <a href="?form=<?= urlencode($form) ?>&date=<?= $date ?>&status_filter=<?= $statusFilter === 'Present' ? '' : 'Present' ?>" class="bg-white p-8 rounded-[3rem] shadow-xl shadow-school-blue/5 border <?= $statusFilter === 'Present' ? 'border-green-500 ring-2 ring-green-500/20' : 'border-gray-50' ?> flex items-center space-x-6 hover:scale-105 transition-all cursor-pointer">
                         <div class="w-14 h-14 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center">
                             <i data-lucide="check-circle-2" class="w-7 h-7"></i>
                         </div>
@@ -347,9 +373,9 @@ if ($_SESSION['role'] === 'Teacher') {
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Present</p>
                             <p class="text-2xl font-black text-green-500"><?= count(array_filter($attStatus, fn($s) => $s === 'Present')) ?></p>
                         </div>
-                    </div>
+                    </a>
 
-                    <div class="bg-white p-8 rounded-[3rem] shadow-xl shadow-school-blue/5 border border-gray-50 flex items-center space-x-6">
+                    <a href="?form=<?= urlencode($form) ?>&date=<?= $date ?>&status_filter=<?= $statusFilter === 'Absent' ? '' : 'Absent' ?>" class="bg-white p-8 rounded-[3rem] shadow-xl shadow-school-blue/5 border <?= $statusFilter === 'Absent' ? 'border-red-500 ring-2 ring-red-500/20' : 'border-gray-50' ?> flex items-center space-x-6 hover:scale-105 transition-all cursor-pointer">
                         <div class="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center">
                             <i data-lucide="x-circle" class="w-7 h-7"></i>
                         </div>
@@ -357,77 +383,114 @@ if ($_SESSION['role'] === 'Teacher') {
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Absent</p>
                             <p class="text-2xl font-black text-red-500"><?= count(array_filter($attStatus, fn($s) => $s === 'Absent')) ?></p>
                         </div>
-                    </div>
+                    </a>
+
+                    <a href="?form=<?= urlencode($form) ?>&date=<?= $date ?>&status_filter=<?= $statusFilter === 'Late' ? '' : 'Late' ?>" class="bg-white p-8 rounded-[3rem] shadow-xl shadow-school-blue/5 border <?= $statusFilter === 'Late' ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-50' ?> flex items-center space-x-6 hover:scale-105 transition-all cursor-pointer">
+                        <div class="w-14 h-14 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center">
+                            <i data-lucide="clock" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Late</p>
+                            <p class="text-2xl font-black text-orange-500"><?= count(array_filter($attStatus, fn($s) => $s === 'Late')) ?></p>
+                        </div>
+                    </a>
                 </div>
 
-                <div class="bg-white rounded-[3rem] p-10 shadow-xl shadow-school-blue/5 border border-gray-50">
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] border-b border-gray-50">
-                                <th class="pb-8">Student Name</th>
-                                <th class="pb-8">Student Phone</th>
-                                <th class="pb-8 text-center">Status Selection</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50">
-                            <?php if (empty($students)): ?>
-                                <tr><td colspan="3" class="py-12 text-center font-bold text-gray-300 uppercase tracking-widest">No students found in this form</td></tr>
-                            <?php endif; ?>
-                            <?php foreach ($students as $student): 
-                                $s_id = (string)$student->_id;
-                                $status = isset($attStatus[$s_id]) ? $attStatus[$s_id] : 'Present';
-                            ?>
-                            <tr class="group hover:bg-school-accent/[0.02] transition-all">
-                                <td class="py-8">
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 rounded-2xl bg-school-accent/10 flex items-center justify-center text-school-accent">
-                                            <i data-lucide="user-check" class="w-6 h-6"></i>
+                <div class="bg-white rounded-[3rem] p-6 md:p-10 shadow-xl shadow-school-blue/5 border border-gray-50">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left min-w-[600px]">
+                            <thead>
+                                <tr class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] border-b border-gray-50">
+                                    <th class="pb-8">Student Name</th>
+                                    <th class="pb-8">Student Phone</th>
+                                    <th class="pb-8 text-center">Status Selection</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                <?php if (empty($students)): ?>
+                                    <tr><td colspan="3" class="py-12 text-center font-bold text-gray-300 uppercase tracking-widest">No students found in this form</td></tr>
+                                <?php endif; ?>
+                                <?php foreach ($students as $student): 
+                                    $s_id = (string)$student->_id;
+                                    $status = isset($attStatus[$s_id]) ? $attStatus[$s_id] : 'Present';
+                                ?>
+                                <tr class="group hover:bg-school-accent/[0.02] transition-all">
+                                    <td class="py-8">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="w-12 h-12 rounded-2xl bg-school-accent/10 flex items-center justify-center text-school-accent">
+                                                <i data-lucide="user-check" class="w-6 h-6"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-black text-school-accent tracking-tighter uppercase"><?= htmlspecialchars($student->name) ?></h4>
+                                                <a href="?form=<?= urlencode($form) ?>&date=<?= $date ?>&history_id=<?= $s_id ?>" class="mt-1 inline-flex items-center space-x-1 text-[9px] font-black text-school-purple hover:text-school-coral uppercase tracking-widest transition-all">
+                                                    <i data-lucide="history" class="w-3 h-3"></i>
+                                                    <span>View History</span>
+                                                </a>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 class="text-sm font-black text-school-accent tracking-tighter uppercase"><?= htmlspecialchars($student->name) ?></h4>
-                                            <a href="?form=<?= urlencode($form) ?>&date=<?= $date ?>&history_id=<?= $s_id ?>" class="mt-1 inline-flex items-center space-x-1 text-[9px] font-black text-school-purple hover:text-school-coral uppercase tracking-widest transition-all">
-                                                <i data-lucide="history" class="w-3 h-3"></i>
-                                                <span>View History</span>
-                                            </a>
+                                    </td>
+                                    <td class="py-8">
+                                        <div class="flex items-center text-gray-400 font-black text-[10px] uppercase tracking-widest">
+                                            <i data-lucide="phone-forwarded" class="w-3.5 h-3.5 mr-2 opacity-30"></i>
+                                            <?= htmlspecialchars($student->student_phone ?? 'N/A') ?>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="py-8">
-                                    <div class="flex items-center text-gray-400 font-black text-[10px] uppercase tracking-widest">
-                                        <i data-lucide="phone-forwarded" class="w-3.5 h-3.5 mr-2 opacity-30"></i>
-                                        <?= htmlspecialchars($student->student_phone ?? 'N/A') ?>
-                                    </div>
-                                </td>
-                                <td class="py-8">
-                                    <div class="flex items-center justify-center space-x-4 lg:space-x-8">
-                                        <?php 
-                                        $options = [
-                                            'Present' => ['S' => 'P', 'I' => 'check-circle-2', 'C' => 'present'], 
-                                            'Absent' => ['S' => 'A', 'I' => 'x-circle', 'C' => 'absent'], 
-                                            'Late' => ['S' => 'L', 'I' => 'clock', 'C' => 'late']
-                                        ];
-                                        foreach ($options as $full => $meta): 
-                                        ?>
-                                        <div class="flex flex-col items-center">
-                                            <input type="hidden" name="student_names[<?= $s_id ?>]" value="<?= htmlspecialchars($student->name) ?>">
-                                            <input type="radio" id="att_<?= $s_id ?>_<?= $meta['S'] ?>" name="attendance[<?= $s_id ?>]" value="<?= $full ?>" <?= $status == $full ? 'checked' : '' ?> class="hidden peer status-radio status-radio-<?= $meta['C'] ?>">
-                                            <label for="att_<?= $s_id ?>_<?= $meta['S'] ?>" class="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-300 hover:bg-gray-100 transition-all cursor-pointer peer-checked:shadow-2xl">
-                                                <i data-lucide="<?= $meta['I'] ?>" class="w-6 h-6"></i>
-                                            </label>
-                                            <span class="text-[8px] font-black text-gray-400 mt-3 uppercase tracking-widest pointer-events-none"><?= $full ?></span>
+                                    </td>
+                                    <td class="py-8">
+                                        <div class="flex items-center justify-center space-x-4 lg:space-x-8">
+                                            <?php 
+                                            $options = [
+                                                'Present' => ['S' => 'P', 'I' => 'check-circle-2', 'C' => 'present'], 
+                                                'Absent' => ['S' => 'A', 'I' => 'x-circle', 'C' => 'absent'], 
+                                                'Late' => ['S' => 'L', 'I' => 'clock', 'C' => 'late']
+                                            ];
+                                            foreach ($options as $full => $meta): 
+                                            ?>
+                                            <div class="flex flex-col items-center">
+                                                <input type="hidden" name="student_names[<?= $s_id ?>]" value="<?= htmlspecialchars($student->name) ?>">
+                                                <input type="hidden" name="student_forms[<?= $s_id ?>]" value="<?= htmlspecialchars($student->form) ?>">
+                                                <input type="radio" id="att_<?= $s_id ?>_<?= $meta['S'] ?>" name="attendance[<?= $s_id ?>]" value="<?= $full ?>" <?= $status == $full ? 'checked' : '' ?> class="hidden peer status-radio status-radio-<?= $meta['C'] ?>">
+                                                <label for="att_<?= $s_id ?>_<?= $meta['S'] ?>" class="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-300 hover:bg-gray-100 transition-all cursor-pointer peer-checked:shadow-2xl">
+                                                    <i data-lucide="<?= $meta['I'] ?>" class="w-6 h-6"></i>
+                                                </label>
+                                                <span class="text-[8px] font-black text-gray-400 mt-3 uppercase tracking-widest pointer-events-none"><?= $full ?></span>
+                                            </div>
+                                            <?php endforeach; ?>
                                         </div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </form>
     </main>
 
-    <script>lucide.createIcons();</script>
+    <script>
+        lucide.createIcons();
+
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            const toggleSidebar = () => {
+                const isOpen = sidebar.classList.contains('translate-x-0');
+                if (isOpen) {
+                    sidebar.classList.remove('translate-x-0');
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                } else {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebar.classList.add('translate-x-0');
+                    sidebarOverlay.classList.remove('hidden');
+                }
+            };
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+        }
+    </script>
 </body>
 </html>

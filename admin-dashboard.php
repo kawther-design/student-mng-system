@@ -17,6 +17,10 @@ $totalStudents = $studentColl->countDocuments();
 $totalTeachers = $userColl->countDocuments(['role' => 'Teacher']);
 $activeSections = count($studentColl->distinct('form'));
 
+// Fetch Late count for today
+$today = date('Y-m-d');
+$lateCount = $attColl->countDocuments(['date' => $today, 'status' => 'Late']);
+
 // Fetch recent students
 $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' => -1]])->toArray();
 ?>
@@ -81,7 +85,10 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
 </head>
 <body class="text-gray-800 flex min-h-screen">
 
-    <aside class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-8 shadow-2xl shadow-school-blue/5">
+    <!-- Sidebar Overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 bg-school-blue/20 backdrop-blur-sm hidden transition-opacity duration-300"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-school-blue border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-blue/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-school-blue rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-blue/20">
                 <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
@@ -97,15 +104,15 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
                 <span class="font-black text-sm uppercase tracking-widest">Dashboard</span>
             </a>
-            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+            <a href="manage-users.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-blue transition-all">
                 <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Users</span>
             </a>
-            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+            <a href="manage-attendance.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-blue transition-all">
                 <i data-lucide="calendar-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Attendance</span>
             </a>
-            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-gray-400 hover:text-school-blue hover:bg-school-blue/5 transition-all">
+            <a href="manage-exams.php" class="sidebar-item group flex items-center space-x-4 p-4 rounded-[1.5rem] text-school-blue transition-all">
                 <i data-lucide="file-spreadsheet" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm">Exam & Results</span>
             </a>
@@ -120,11 +127,14 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
     </aside>
 
     <main class="flex-1 lg:ml-72 w-full">
-        <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-10 h-24 flex items-center justify-between sticky top-0 z-30">
+        <header class="bg-white/70 backdrop-blur-xl border-b border-gray-100 px-6 md:px-10 h-24 flex items-center justify-between sticky top-0 z-30">
             <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle" class="lg:hidden p-3 bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-100 flex items-center justify-center text-school-blue transition-all">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
                 <div>
-                    <h2 class="text-2xl font-black text-school-blue tracking-tighter uppercase">Administrator Portal</h2>
-                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Institutional Control Center</p>
+                    <h2 class="text-xl md:text-2xl font-black text-school-blue tracking-tighter uppercase leading-none">Admin Portal</h2>
+                    <p class="text-[9px] md:text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">Control Center</p>
                 </div>
             </div>
             <div class="flex items-center space-x-8">
@@ -151,7 +161,8 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                <div class="stat-card p-10 rounded-[3.5rem] relative overflow-hidden group">
+                <a href="manage-students.php" class="block">
+<div class="stat-card p-10 rounded-[3.5rem] relative overflow-hidden group">
                     <div class="p-4 bg-school-teal/10 text-school-teal w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-school-teal/10">
                         <i data-lucide="layout" class="w-7 h-7"></i>
                     </div>
@@ -159,8 +170,10 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
                     <p class="text-5xl font-black text-school-blue mt-2 tracking-tighter"><?= $activeSections ?> <span class="text-sm text-gray-300 font-bold uppercase ml-1">Forms</span></p>
                     <i data-lucide="layout" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-teal/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
                 </div>
+</a>
 
-                <div class="stat-card p-10 rounded-[3.5rem] relative overflow-hidden group">
+                <a href="manage-users.php" class="block">
+<div class="stat-card p-10 rounded-[3.5rem] relative overflow-hidden group">
                     <div class="p-4 bg-school-purple/10 text-school-purple w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-school-purple/10">
                         <i data-lucide="shield" class="w-7 h-7"></i>
                     </div>
@@ -168,8 +181,10 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
                     <p class="text-5xl font-black text-school-blue mt-2 tracking-tighter"><?= $totalTeachers ?> <span class="text-sm text-gray-300 font-bold uppercase ml-1">Users</span></p>
                     <i data-lucide="shield" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-purple/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
                 </div>
+</a>
 
-                <div class="stat-card bg-school-blue p-10 rounded-[3.5rem] relative overflow-hidden group border-none shadow-2xl shadow-school-blue/30 text-white">
+                <a href="manage-students.php" class="block">
+<div class="stat-card bg-school-blue p-10 rounded-[3.5rem] relative overflow-hidden group border-none shadow-2xl shadow-school-blue/30 text-white">
                     <div class="p-4 bg-white/10 text-white w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-black/10">
                         <i data-lucide="users" class="w-7 h-7"></i>
                     </div>
@@ -177,15 +192,18 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
                     <p class="text-6xl font-black text-white mt-2 tracking-tighter"><?= $totalStudents ?></p>
                     <i data-lucide="users" class="absolute -bottom-10 -right-10 w-48 h-48 text-white/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
                 </div>
+</a>
 
-                <div class="stat-card p-10 rounded-[3.5rem] relative overflow-hidden group">
-                    <div class="p-4 bg-school-coral/10 text-school-coral w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-school-coral/10">
-                        <i data-lucide="activity" class="w-7 h-7"></i>
+                <a href="manage-attendance.php" class="block">
+                    <div class="stat-card p-10 rounded-[3.5rem] relative overflow-hidden group">
+                        <div class="p-4 bg-orange-500/10 text-orange-500 w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-orange-500/10">
+                            <i data-lucide="clock" class="w-7 h-7"></i>
+                        </div>
+                        <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em]">Late Today</h4>
+                        <p class="text-5xl font-black text-school-blue mt-2 tracking-tighter"><?= $lateCount ?><span class="text-sm text-gray-300 font-bold uppercase ml-1">Students</span></p>
+                        <i data-lucide="clock" class="absolute -bottom-6 -right-6 w-32 h-32 text-orange-500/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
                     </div>
-                    <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em]">Academic Perf.</h4>
-                    <p class="text-5xl font-black text-school-blue mt-2 tracking-tighter">94<span class="text-xl text-gray-300 ml-1">%</span></p>
-                    <i data-lucide="activity" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-coral/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
-                </div>
+                </a>
             </div>
 
             <div class="bg-white rounded-[4rem] p-12 shadow-2xl shadow-school-blue/5 border border-gray-100 relative overflow-hidden">
@@ -242,6 +260,30 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
         </div>
     </main>
 
-    <script>lucide.createIcons();</script>
+    <script>
+        lucide.createIcons();
+
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            const toggleSidebar = () => {
+                const isOpen = sidebar.classList.contains('translate-x-0');
+                if (isOpen) {
+                    sidebar.classList.remove('translate-x-0');
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                } else {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebar.classList.add('translate-x-0');
+                    sidebarOverlay.classList.remove('hidden');
+                }
+            };
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+        }
+    </script>
 </body>
 </html>
