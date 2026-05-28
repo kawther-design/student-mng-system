@@ -17,8 +17,35 @@ $subjects = [
     'somali' => 'Somali', 'english' => 'English', 'history' => 'History', 'geography' => 'Geography'
 ];
 
-$msg = '';
-$error = '';
+$msg = isset($_GET['msg']) ? $_GET['msg'] : '';
+$error = isset($_GET['error']) ? $_GET['error'] : '';
+
+// Handle Download Template
+if (isset($_GET['action']) && $_GET['action'] === 'download_template') {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="alhuda_exam_results_template.csv"');
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['StudentID', 'Arabic', 'Islamic', 'Biology', 'Physics', 'Mathematics', 'Chemistry', 'Somali', 'English', 'History', 'Geography']);
+    fputcsv($output, ['1001', '85', '90', '78', '88', '95', '80', '85', '92', '87', '89']);
+    fclose($output);
+    exit;
+}
+
+// Handle Delete Exam
+if (isset($_GET['delete_exam_id'])) {
+    $delExamId = $_GET['delete_exam_id'];
+    try {
+        // Delete all student results for this exam
+        $resultsColl->deleteMany(['exam_id' => $delExamId]);
+        // Delete the exam document itself
+        $examsColl->deleteOne(['_id' => new MongoDB\BSON\ObjectId($delExamId)]);
+        $msg = "Exam and its results deleted successfully.";
+        header("Location: manage-exams.php?msg=" . urlencode($msg));
+        exit;
+    } catch (Exception $e) {
+        $error = "Error deleting exam: " . $e->getMessage();
+    }
+}
 
 // Handle Results Upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'upload_results') {
@@ -273,11 +300,17 @@ if ($_SESSION['role'] === 'Teacher') {
                     </button>
                 </form>
 
-                <div class="mt-10 pt-10 border-t border-gray-50">
-                    <p class="text-[9px] font-black text-gray-300 uppercase tracking-widest mb-4">CSV Format Requirement:</p>
-                    <div class="bg-gray-50 p-6 rounded-2xl text-[8px] font-bold text-gray-400 font-mono overflow-x-auto whitespace-nowrap">
-                        StudentID, Arabic, Islamic, Biology, Physics, Math, Chem, Somali, English, History, Geog
+                <div class="mt-10 pt-10 border-t border-gray-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <p class="text-[9px] font-black text-gray-300 uppercase tracking-widest mb-2">CSV Format Requirement:</p>
+                        <div class="bg-gray-50 p-4 rounded-xl text-[8px] font-bold text-gray-400 font-mono overflow-x-auto whitespace-nowrap">
+                            StudentID, Arabic, Islamic, Biology, Physics, Math, Chem, Somali, English, History, Geog
+                        </div>
                     </div>
+                    <a href="?action=download_template" class="self-start sm:self-center px-5 py-3 bg-school-accent/5 hover:bg-school-accent hover:text-white text-school-accent text-[9px] font-black uppercase tracking-widest rounded-xl border border-school-accent/10 flex items-center transition-all">
+                        <i data-lucide="download" class="w-3.5 h-3.5 mr-2"></i>
+                        Download template
+                    </a>
                 </div>
             </div>
 
@@ -302,7 +335,12 @@ if ($_SESSION['role'] === 'Teacher') {
                                     <p class="text-[9px] text-gray-400 font-bold uppercase mt-0.5"><?= date('M d, Y', $re->created_at->toDateTime()->getTimestamp()) ?></p>
                                 </div>
                             </div>
-                            <a href="manage-results.php?exam_id=<?= $re->_id ?>" class="px-5 py-3 bg-white text-school-accent rounded-xl text-[8px] font-black uppercase tracking-widest border border-school-accent/10 hover:bg-school-accent hover:text-white transition-all opacity-0 group-hover:opacity-100">View Details</a>
+                            <div class="flex items-center space-x-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                <a href="manage-results.php?exam_id=<?= $re->_id ?>" class="px-5 py-3 bg-white text-school-accent rounded-xl text-[8px] font-black uppercase tracking-widest border border-school-accent/10 hover:bg-school-accent hover:text-white transition-all">View Details</a>
+                                <a href="?delete_exam_id=<?= $re->_id ?>" onclick="return confirm('Are you sure you want to permanently delete this exam and all its associated marks?')" class="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                </a>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>

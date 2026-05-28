@@ -140,7 +140,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Fetch Students by Class
 $currentClass = $_GET['class'] ?? '';
 $studentColl = $database->getCollection('students');
-$allClasses = $studentColl->distinct('form');
+$predefinedClasses = [
+    'Form 1', 'Form 1 A', 'Form 1 B', 'Form 1 C', 'Form 1 D', 'Form 1 E',
+    'Form 2', 'Form 2 A', 'Form 2 B', 'Form 2 C', 'Form 2 D', 'Form 2 E',
+    'Form 3', 'Form 3 A', 'Form 3 B', 'Form 3 C', 'Form 3 D', 'Form 3 E',
+    'Form 4', 'Form 4 A', 'Form 4 B', 'Form 4 C', 'Form 4 D', 'Form 4 E'
+];
+$dbClasses = $studentColl->distinct('form');
+$allClasses = array_unique(array_merge($predefinedClasses, $dbClasses));
 sort($allClasses);
 
 $students = [];

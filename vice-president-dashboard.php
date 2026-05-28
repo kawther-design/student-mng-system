@@ -156,32 +156,38 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                <div class="glass-card p-10 rounded-[3.5rem] relative overflow-hidden group">
-                    <div class="p-4 bg-school-teal/10 text-school-teal w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-school-teal/10">
-                        <i data-lucide="graduation-cap" class="w-7 h-7"></i>
+                <a href="manage-students.php" class="block">
+                    <div class="glass-card p-10 rounded-[3.5rem] relative overflow-hidden group">
+                        <div class="p-4 bg-school-teal/10 text-school-teal w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-school-teal/10">
+                            <i data-lucide="graduation-cap" class="w-7 h-7"></i>
+                        </div>
+                        <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-widest">Total Enrollment</h4>
+                        <p class="text-5xl font-black text-school-teal mt-2 tracking-tighter"><?= $totalStudents ?> <span class="text-sm text-gray-300 font-bold uppercase ml-1">Students</span></p>
+                        <i data-lucide="graduation-cap" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-teal/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
                     </div>
-                    <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-widest">Total Enrollment</h4>
-                    <p class="text-5xl font-black text-school-teal mt-2 tracking-tighter"><?= $totalStudents ?> <span class="text-sm text-gray-300 font-bold uppercase ml-1">Students</span></p>
-                    <i data-lucide="graduation-cap" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-teal/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
-                </div>
+                </a>
 
-                <div class="glass-card p-10 rounded-[3.5rem] relative overflow-hidden group">
-                    <div class="p-4 bg-school-emerald/10 text-school-emerald w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-school-emerald/10">
-                        <i data-lucide="book-open" class="w-7 h-7"></i>
+                <a href="manage-students.php" class="block">
+                    <div class="glass-card p-10 rounded-[3.5rem] relative overflow-hidden group">
+                        <div class="p-4 bg-school-emerald/10 text-school-emerald w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-school-emerald/10">
+                            <i data-lucide="book-open" class="w-7 h-7"></i>
+                        </div>
+                        <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-widest">Active Levels</h4>
+                        <p class="text-5xl font-black text-school-teal mt-2 tracking-tighter"><?= $activeSections ?> <span class="text-sm text-gray-300 font-bold uppercase ml-1">Classes</span></p>
+                        <i data-lucide="book-open" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-emerald/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
                     </div>
-                    <h4 class="text-gray-400 font-black text-[10px] uppercase tracking-widest">Active Levels</h4>
-                    <p class="text-5xl font-black text-school-teal mt-2 tracking-tighter"><?= $activeSections ?> <span class="text-sm text-gray-300 font-bold uppercase ml-1">Classes</span></p>
-                    <i data-lucide="book-open" class="absolute -bottom-6 -right-6 w-32 h-32 text-school-emerald/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
-                </div>
+                </a>
 
-                <div class="glass-card bg-school-teal p-10 rounded-[3.5rem] relative overflow-hidden group border-none shadow-2xl shadow-school-teal/30 text-white">
-                    <div class="p-4 bg-white/20 text-white w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-black/10">
-                        <i data-lucide="users" class="w-7 h-7"></i>
+                <a href="manage-users.php" class="block">
+                    <div class="glass-card bg-school-teal p-10 rounded-[3.5rem] relative overflow-hidden group border-none shadow-2xl shadow-school-teal/30 text-white">
+                        <div class="p-4 bg-white/20 text-white w-fit rounded-2xl mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-black/10">
+                            <i data-lucide="users" class="w-7 h-7"></i>
+                        </div>
+                        <h4 class="text-white/40 font-black text-[10px] uppercase tracking-widest">Faculty Body</h4>
+                        <p class="text-6xl font-black text-white mt-2 tracking-tighter"><?= $totalTeachers ?></p>
+                        <i data-lucide="users" class="absolute -bottom-10 -right-10 w-48 h-48 text-white/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
                     </div>
-                    <h4 class="text-white/40 font-black text-[10px] uppercase tracking-widest">Faculty Body</h4>
-                    <p class="text-6xl font-black text-white mt-2 tracking-tighter"><?= $totalTeachers ?></p>
-                    <i data-lucide="users" class="absolute -bottom-10 -right-10 w-48 h-48 text-white/5 rotate-12 group-hover:scale-110 transition-transform duration-700"></i>
-                </div>
+                </a>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-1 gap-8">

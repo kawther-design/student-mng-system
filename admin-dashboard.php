@@ -88,7 +88,7 @@ $recentStudents = $studentColl->find([], ['limit' => 5, 'sort' => ['created_at' 
     <!-- Sidebar Overlay for mobile -->
     <div id="sidebar-overlay" class="fixed inset-0 z-40 bg-school-blue/20 backdrop-blur-sm hidden transition-opacity duration-300"></div>
 
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-school-blue border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-blue/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-blue/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-school-blue rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-blue/20">
                 <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>

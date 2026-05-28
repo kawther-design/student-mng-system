@@ -281,46 +281,173 @@ foreach ($attendanceRecords as $record) {
             </div>
         </div>
 
-        <div class="bg-white/60 backdrop-blur-2xl rounded-[5rem] p-16 shadow-2xl shadow-school-purple/10 border border-white/50 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-96 h-96 bg-school-purple/5 rounded-full -mr-48 -mt-48 transition-transform group-hover:scale-110 duration-1000"></div>
-            <div class="flex items-center justify-between mb-16 relative z-10">
+        <!-- Bottom Dashboard Sections -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+            <!-- Left Side: Schedule and Classes -->
+            <div class="lg:col-span-7 bg-white/60 backdrop-blur-2xl rounded-[3rem] p-10 shadow-2xl shadow-school-purple/5 border border-white/50 flex flex-col justify-between">
                 <div>
-                    <h3 class="text-2xl font-black text-school-purple tracking-tighter uppercase">Academic Schedule</h3>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Upcoming assessments & deadlines</p>
-                </div>
-                <span class="px-6 py-2 bg-school-purple/5 text-school-purple text-[10px] font-black uppercase tracking-widest rounded-full border border-school-purple/10">Term 2 • 2026</span>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="flex items-center justify-between p-8 bg-gray-50/50 rounded-[2.5rem] border border-gray-100 group hover:bg-white hover:shadow-xl transition-all duration-500 cursor-pointer">
-                    <div class="flex items-center space-x-6">
-                        <div class="w-16 h-16 bg-white rounded-2xl shadow-sm text-school-purple flex items-center justify-center group-hover:bg-school-purple group-hover:text-white group-hover:scale-110 transition-all duration-500">
-                            <i data-lucide="calendar" class="w-7 h-7"></i>
-                        </div>
+                    <div class="flex items-center justify-between mb-8">
                         <div>
-                            <p class="text-xl font-black text-school-purple uppercase tracking-tighter">Mathematics Midterm</p>
-                            <div class="flex items-center space-x-2 mt-1">
-                                <span class="text-[10px] text-gray-400 font-black uppercase tracking-widest">May 15 • Form 3A</span>
+                            <div class="flex items-center space-x-3">
+                                <h3 class="text-2xl font-black text-school-blue uppercase tracking-tight">Today's Schedule</h3>
+                                <span class="px-3 py-1 bg-green-500/10 text-green-600 text-[9px] font-black uppercase tracking-widest rounded-full flex items-center">
+                                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                                    On Track
+                                </span>
                             </div>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Your teaching sessions & assignments</p>
+                        </div>
+                        <div class="px-4 py-2 bg-school-purple/5 border border-school-purple/10 rounded-2xl flex items-center space-x-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-school-purple"></i>
+                            <span class="text-[10px] font-black text-school-purple uppercase tracking-wider"><?= date('l, M d') ?></span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Class 1 -->
+                        <div class="group flex items-center justify-between p-6 bg-white/80 hover:bg-white rounded-[2rem] border border-purple-100/50 hover:border-school-purple/20 shadow-sm hover:shadow-xl transition-all duration-300">
+                            <div class="flex items-center space-x-5">
+                                <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-500 group-hover:scale-110 transition-transform">
+                                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-black text-school-blue uppercase tracking-tight">Mathematics</h4>
+                                    <div class="flex items-center space-x-3 mt-1 text-gray-400">
+                                        <span class="text-[9px] font-bold uppercase tracking-wider flex items-center">
+                                            <i data-lucide="users" class="w-3.5 h-3.5 mr-1 text-school-purple/50"></i>
+                                            Form 3A
+                                        </span>
+                                        <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                        <span class="text-[9px] font-bold uppercase tracking-wider flex items-center">
+                                            <i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-school-purple/50"></i>
+                                            08:30 AM - 09:30 AM
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="px-4 py-1.5 bg-green-50 text-green-600 text-[9px] font-black uppercase tracking-widest rounded-full border border-green-100 flex items-center">
+                                <i data-lucide="check" class="w-3 h-3 mr-1"></i>
+                                Completed
+                            </span>
+                        </div>
+
+                        <!-- Class 2 -->
+                        <div class="group flex items-center justify-between p-6 bg-white/80 hover:bg-white rounded-[2rem] border border-purple-100/50 hover:border-school-purple/20 shadow-sm hover:shadow-xl transition-all duration-300">
+                            <div class="flex items-center space-x-5">
+                                <div class="w-14 h-14 bg-school-purple/5 rounded-2xl flex items-center justify-center text-school-purple group-hover:scale-110 transition-transform">
+                                    <i data-lucide="flask-conical" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-black text-school-blue uppercase tracking-tight">Physics Practical</h4>
+                                    <div class="flex items-center space-x-3 mt-1 text-gray-400">
+                                        <span class="text-[9px] font-bold uppercase tracking-wider flex items-center">
+                                            <i data-lucide="users" class="w-3.5 h-3.5 mr-1 text-school-purple/50"></i>
+                                            Form 4B
+                                        </span>
+                                        <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                        <span class="text-[9px] font-bold uppercase tracking-wider flex items-center">
+                                            <i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-school-purple/50"></i>
+                                            10:00 AM - 11:30 AM
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="px-4 py-1.5 bg-school-purple/10 text-school-purple text-[9px] font-black uppercase tracking-widest rounded-full border border-school-purple/20 flex items-center animate-pulse">
+                                <span class="w-1.5 h-1.5 bg-school-purple rounded-full mr-1.5"></span>
+                                In Progress
+                            </span>
+                        </div>
+
+                        <!-- Class 3 -->
+                        <div class="group flex items-center justify-between p-6 bg-white/80 hover:bg-white rounded-[2rem] border border-purple-100/50 hover:border-school-purple/20 shadow-sm hover:shadow-xl transition-all duration-300">
+                            <div class="flex items-center space-x-5">
+                                <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-school-orange group-hover:scale-110 transition-transform">
+                                    <i data-lucide="layers" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-black text-school-blue uppercase tracking-tight">General Science</h4>
+                                    <div class="flex items-center space-x-3 mt-1 text-gray-400">
+                                        <span class="text-[9px] font-bold uppercase tracking-wider flex items-center">
+                                            <i data-lucide="users" class="w-3.5 h-3.5 mr-1 text-school-purple/50"></i>
+                                            Form 2C
+                                        </span>
+                                        <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                        <span class="text-[9px] font-bold uppercase tracking-wider flex items-center">
+                                            <i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-school-purple/50"></i>
+                                            12:00 PM - 01:00 PM
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="px-4 py-1.5 bg-gray-50 text-gray-500 text-[9px] font-black uppercase tracking-widest rounded-full border border-gray-100 flex items-center">
+                                <i data-lucide="hourglass" class="w-3 h-3 mr-1"></i>
+                                Upcoming
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Bulletin & Quick Actions -->
+            <div class="lg:col-span-5 flex flex-col space-y-8">
+                <!-- Bulletins & School Circulars -->
+                <div class="bg-white/60 backdrop-blur-2xl rounded-[3rem] p-10 shadow-2xl shadow-school-purple/5 border border-white/50 flex-1">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 class="text-2xl font-black text-school-blue uppercase tracking-tight">Staff Bulletin</h3>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Official updates for teachers</p>
+                        </div>
+                        <div class="p-3 bg-school-purple/5 text-school-purple rounded-2xl">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Bulletin 1 -->
+                        <div class="p-5 bg-white/85 rounded-2xl border-l-4 border-red-500 shadow-sm space-y-2 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between">
+                                <span class="px-2 py-0.5 bg-red-50 text-red-500 text-[8px] font-black uppercase tracking-widest rounded">Urgent</span>
+                                <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">Today</span>
+                            </div>
+                            <h5 class="text-sm font-black text-school-blue uppercase tracking-tight">Term 2 Exam Papers Submission</h5>
+                            <p class="text-xs text-gray-500 leading-relaxed font-medium">All department leads must submit their finalized exam drafts to the academic board by Thursday afternoon.</p>
+                        </div>
+
+                        <!-- Bulletin 2 -->
+                        <div class="p-5 bg-white/85 rounded-2xl border-l-4 border-school-purple/50 shadow-sm space-y-2 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between">
+                                <span class="px-2 py-0.5 bg-purple-50 text-school-purple text-[8px] font-black uppercase tracking-widest rounded">General</span>
+                                <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">Yesterday</span>
+                            </div>
+                            <h5 class="text-sm font-black text-school-blue uppercase tracking-tight">Parent-Teacher Conference</h5>
+                            <p class="text-xs text-gray-500 leading-relaxed font-medium">Scheduled for this Saturday at 9:00 AM. Please verify and print your students' attendance statistics beforehand.</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between p-8 bg-gray-50/50 rounded-[2.5rem] border border-gray-100 group hover:bg-white hover:shadow-xl transition-all duration-500 cursor-pointer">
-                    <div class="flex items-center space-x-6">
-                        <div class="w-16 h-16 bg-white rounded-2xl shadow-sm text-school-purple flex items-center justify-center group-hover:bg-school-purple group-hover:text-white group-hover:scale-110 transition-all duration-500">
-                            <i data-lucide="flask-conical" class="w-7 h-7"></i>
-                        </div>
-                        <div>
-                            <p class="text-xl font-black text-school-purple uppercase tracking-tighter">Physics Practical</p>
-                            <div class="flex items-center space-x-2 mt-1">
-                                <span class="text-[10px] text-gray-400 font-black uppercase tracking-widest">May 18 • Form 4B</span>
+                <!-- Quick Actions Grid -->
+                <div class="bg-white/60 backdrop-blur-2xl rounded-[3rem] p-10 shadow-2xl shadow-school-purple/5 border border-white/50">
+                    <h3 class="text-lg font-black text-school-blue uppercase tracking-tight mb-6">Quick Actions</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="manage-attendance.php" class="group flex flex-col p-5 bg-white/80 hover:bg-school-purple rounded-[2rem] border border-purple-100/50 hover:border-transparent shadow-sm hover:shadow-xl transition-all duration-300 text-left">
+                            <div class="w-10 h-10 bg-school-purple/10 text-school-purple group-hover:bg-white/20 group-hover:text-white rounded-xl flex items-center justify-center mb-4 transition-colors">
+                                <i data-lucide="calendar-check" class="w-5 h-5"></i>
                             </div>
-                        </div>
+                            <span class="text-xs font-black text-school-blue group-hover:text-white uppercase tracking-wider">Take Attendance</span>
+                            <span class="text-[8px] text-gray-400 group-hover:text-purple-200 mt-1 leading-snug">Register daily student presence</span>
+                        </a>
+
+                        <button onclick="openStatusModal('Present')" class="group flex flex-col p-5 bg-white/80 hover:bg-school-blue rounded-[2rem] border border-purple-100/50 hover:border-transparent shadow-sm hover:shadow-xl transition-all duration-300 text-left">
+                            <div class="w-10 h-10 bg-school-blue/10 text-school-blue group-hover:bg-white/20 group-hover:text-white rounded-xl flex items-center justify-center mb-4 transition-colors">
+                                <i data-lucide="users" class="w-5 h-5"></i>
+                            </div>
+                            <span class="text-xs font-black text-school-blue group-hover:text-white uppercase tracking-wider">Student Roster</span>
+                            <span class="text-[8px] text-gray-400 group-hover:text-blue-200 mt-1 leading-snug">View enrolled students detail</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-
         <!-- Attendance Detail Modal -->
         <div id="attendanceModal" class="modal-overlay" style="<?= isset($_GET['view']) ? 'display: flex;' : 'display: none;' ?>">
             <div class="modal-content">

@@ -108,18 +108,7 @@ if (!empty($moduleBgClass)) {
     $sidebarBgClass = $moduleBgClass;
 }
 ?>
-// Determine sidebar background class based on role
-$role = $_SESSION['role'] ?? 'Admin';
-if ($role === 'Teacher') {
-    $sidebarBgClass = 'bg-school-purple';
-} elseif ($role === 'Parent') {
-    $sidebarBgClass = 'bg-school-coral';
-} elseif ($role === 'Vice President') {
-    $sidebarBgClass = 'bg-school-teal';
-} else {
-    $sidebarBgClass = 'bg-school-blue';
-}
-?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -332,7 +321,7 @@ if ($role === 'Teacher') {
     <!-- Sidebar Overlay for mobile -->
     <div id="sidebar-overlay" class="fixed inset-0 z-40 backdrop-blur-sm hidden transition-opacity duration-300" style="background-color: <?= $accentColor ?>20;"></div>
 
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 <?= $sidebarBgClass ?> border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-accent/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col p-8 shadow-2xl shadow-school-accent/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="flex items-center space-x-4 mb-16">
             <div class="w-12 h-12 bg-school-accent rounded-[1.2rem] flex items-center justify-center shadow-xl shadow-school-accent/20">
                 <i data-lucide="graduation-cap" class="text-white w-7 h-7"></i>
