@@ -155,7 +155,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <h1 class="text-2xl font-black text-school-blue tracking-tighter uppercase">Al Huda</h1>
         </div>
 
-        <nav class="hidden md:flex items-center space-x-12">
+        <nav class="hidden lg:flex items-center space-x-8 xl:space-x-12">
             <a href="index.php" class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>">HOME</a>
             <a href="academics.php" class="nav-link <?= ($current_page == 'academics.php') ? 'active' : '' ?>">ACADEMICS</a>
             <a href="examinations.php" class="nav-link <?= ($current_page == 'examinations.php') ? 'active' : '' ?>">EXAMINATIONS</a>
@@ -164,12 +164,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </nav>
 
         <a href="login.php"
-            class="hidden md:inline-block bg-school-blue text-white px-10 py-4 rounded-full font-black text-[11px] uppercase tracking-[0.2em] hover:bg-opacity-90 transition-all shadow-xl shadow-school-blue/20">
+            class="hidden lg:inline-block bg-school-blue text-white px-10 py-4 rounded-full font-black text-[11px] uppercase tracking-[0.2em] hover:bg-opacity-90 transition-all shadow-xl shadow-school-blue/20">
             LOGIN
         </a>
 
         <!-- Mobile Menu Trigger -->
-        <button id="mobile-menu-btn" class="md:hidden w-12 h-12 bg-white rounded-2xl border border-gray-100 flex items-center justify-center text-school-blue shadow-md hover:scale-105 active:scale-95 transition-all">
+        <button id="mobile-menu-btn" class="lg:hidden w-12 h-12 bg-white rounded-2xl border border-gray-100 flex items-center justify-center text-school-blue shadow-md hover:scale-105 active:scale-95 transition-all">
             <i id="menu-icon" data-lucide="menu" class="w-6 h-6"></i>
         </button>
     </header>

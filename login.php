@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: admin-dashboard.php');
             exit;
         }
-        $error = 'Credentials khaldan ama Role-ka hubi!';
+        $error = 'Invalid credentials or incorrect portal role!';
     }
 }
 ?>
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: center;
             padding: 24px;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
         }
         .mesh-bg {
             position: absolute;
@@ -142,16 +142,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="floating-blob top-[-200px] right-[-100px]"></div>
     <div class="floating-blob bottom-[-200px] left-[-100px]" style="animation-delay: -10s;"></div>
 
-    <div class="w-full max-w-[480px] glass-container rounded-[4.5rem] p-12 lg:p-16 animate-up relative z-10 border border-white/40">
-        <div class="flex flex-col items-center mb-14 text-center">
+    <div class="w-full max-w-[500px] glass-container rounded-[4.5rem] p-10 lg:p-12 animate-up relative z-10 border border-white/40">
+        <div class="flex flex-col items-center mb-8 text-center">
             <div class="relative group cursor-pointer">
                 <div class="absolute inset-0 bg-school-blue blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                <div class="w-24 h-24 bg-school-blue rounded-[2.8rem] flex items-center justify-center shadow-2xl shadow-school-blue/40 mb-10 relative z-10 transition-all duration-700 group-hover:rotate-[360deg]">
-                    <i data-lucide="graduation-cap" class="text-white w-12 h-12"></i>
+                <div class="w-20 h-20 bg-school-blue rounded-[2.8rem] flex items-center justify-center shadow-2xl shadow-school-blue/40 mb-6 relative z-10 transition-all duration-700 group-hover:rotate-[360deg]">
+                    <i data-lucide="graduation-cap" class="text-white w-10 h-10"></i>
                 </div>
             </div>
-            <h1 class="text-4xl font-black text-school-blue tracking-tighter uppercase leading-none">AL HUDA PORTAL</h1>
-            <div class="flex items-center space-x-3 mt-6">
+            <h1 class="text-3xl font-black text-school-blue tracking-tighter uppercase leading-none">AL HUDA PORTAL</h1>
+            <div class="flex items-center space-x-3 mt-4">
                 <span class="h-[1px] w-8 bg-gray-200"></span>
                 <p class="text-[11px] font-black text-gray-400 uppercase tracking-[0.5em] mt-0.5">Secure Authentication</p>
                 <span class="h-[1px] w-8 bg-gray-200"></span>
@@ -159,13 +159,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <?php if($error): ?>
-            <div class="bg-red-50 text-school-coral text-[10px] font-black uppercase p-6 rounded-3xl mb-10 text-center border border-school-coral/10 animate-shake flex items-center justify-center space-x-3">
+            <div class="bg-red-50 text-school-coral text-[10px] font-black uppercase p-6 rounded-3xl mb-6 text-center border border-school-coral/10 animate-shake flex items-center justify-center space-x-3">
                 <i data-lucide="shield-alert" class="w-4 h-4"></i>
                 <span><?= $error ?></span>
             </div>
         <?php endif; ?>
 
-        <form method="POST" class="space-y-8" autocomplete="off">
+        <form method="POST" class="space-y-6" autocomplete="off">
             <div class="space-y-3">
                 <div class="flex items-center justify-between px-4">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Portal Role</label>
@@ -175,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="absolute left-7 text-gray-300 group-focus-within:text-school-blue transition-colors">
                         <i data-lucide="users-round" class="w-5 h-5"></i>
                     </div>
-                    <select name="role" required class="w-full bg-transparent border-none rounded-[2.2rem] py-6 pl-16 pr-8 outline-none font-bold text-school-blue text-sm appearance-none cursor-pointer">
+                    <select name="role" required class="w-full bg-transparent border-none rounded-[2.2rem] py-5 pl-16 pr-8 outline-none font-bold text-school-blue text-sm appearance-none cursor-pointer">
                         <option value="Admin">System Administrator</option>
                         <option value="Vice President">Vice President</option>
                         <option value="Teacher">Teachers</option>
@@ -196,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="absolute left-7 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-school-blue transition-colors">
                         <i data-lucide="user" class="w-5 h-5"></i>
                     </div>
-                    <input type="text" name="email" value="" required placeholder="Enter username or email" class="w-full bg-transparent border-none rounded-[2.2rem] py-6 pl-16 pr-8 outline-none font-bold text-school-blue text-sm placeholder:text-gray-300/80" autocomplete="off">
+                    <input type="text" name="email" value="" required placeholder="Enter username or email" class="w-full bg-transparent border-none rounded-[2.2rem] py-5 pl-16 pr-8 outline-none font-bold text-school-blue text-sm placeholder:text-gray-300/80" autocomplete="off">
                 </div>
             </div>
 
@@ -209,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="absolute left-7 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-school-blue transition-colors">
                         <i data-lucide="shield-check" class="w-5 h-5"></i>
                     </div>
-                    <input type="password" id="password" name="password" value="" required placeholder="••••••••••••" class="w-full bg-transparent border-none rounded-[2.2rem] py-6 pl-16 pr-16 outline-none font-bold text-school-blue text-sm placeholder:text-gray-300/80" autocomplete="new-password">
+                    <input type="password" id="password" name="password" value="" required placeholder="••••••••••••" class="w-full bg-transparent border-none rounded-[2.2rem] py-5 pl-16 pr-16 outline-none font-bold text-school-blue text-sm placeholder:text-gray-300/80" autocomplete="new-password">
                     <button type="button" onclick="togglePassword()" class="absolute right-7 top-1/2 -translate-y-1/2 text-gray-300 hover:text-school-blue transition-colors">
                         <i data-lucide="eye" id="eye-icon" class="w-5 h-5"></i>
                     </button>
@@ -217,14 +217,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="pt-4">
-                <button type="submit" class="w-full py-6 bg-school-blue text-white rounded-[2.2rem] font-black text-xs uppercase tracking-[0.3em] shadow-3xl shadow-school-blue/40 hover:scale-[1.03] active:scale-95 transition-all duration-500 flex items-center justify-center space-x-4 group relative overflow-hidden">
+                <button type="submit" class="w-full py-5 bg-school-blue text-white rounded-[2.2rem] font-black text-xs uppercase tracking-[0.3em] shadow-3xl shadow-school-blue/40 hover:scale-[1.03] active:scale-95 transition-all duration-500 flex items-center justify-center space-x-4 group relative overflow-hidden">
                     <div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                     <span class="relative z-10">Access Secure Portal</span>
                     <i data-lucide="move-right" class="w-5 h-5 group-hover:translate-x-2 transition-transform relative z-10"></i>
                 </button>
             </div>
             
-            <div class="pt-10 text-center border-t border-gray-100/60">
+            <div class="pt-6 text-center border-t border-gray-100/60">
                 <div class="flex items-center justify-center space-x-4 mb-4">
                     <i data-lucide="shield-check" class="w-4 h-4 text-green-500"></i>
                     <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">End-to-End Encrypted</span>

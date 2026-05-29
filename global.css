@@ -6,23 +6,23 @@
 
 /* Root Typography Scale */
 html {
-    font-size: 17.5px !important; /* Boosts all rem-based sizes (xs, sm, base, lg, etc.) by ~10% */
+    font-size: 18.5px !important; /* Boosts all rem-based sizes (xs, sm, base, lg, etc.) */
 }
 
 /* Explicit Overrides for Tailwind JIT Arbitrary Pixel Font Sizes */
-.text-\[8px\]   { font-size: 12px !important; }
-.text-\[9px\]   { font-size: 12px !important; }
-.text-\[10px\]  { font-size: 13.5px !important; }
-.text-\[11px\]  { font-size: 14.5px !important; }
-.text-\[12px\]  { font-size: 15.5px !important; }
-.text-\[13px\]  { font-size: 16px !important; }
-.text-\[14px\]  { font-size: 17px !important; }
-.text-\[15px\]  { font-size: 18px !important; }
-.text-\[16px\]  { font-size: 19px !important; }
+.text-\[8px\]   { font-size: 13px !important; }
+.text-\[9px\]   { font-size: 13.5px !important; }
+.text-\[10px\]  { font-size: 14.5px !important; }
+.text-\[11px\]  { font-size: 15.5px !important; }
+.text-\[12px\]  { font-size: 16.5px !important; }
+.text-\[13px\]  { font-size: 17px !important; }
+.text-\[14px\]  { font-size: 18px !important; }
+.text-\[15px\]  { font-size: 19px !important; }
+.text-\[16px\]  { font-size: 20px !important; }
 
 /* Boost standard form inputs, select dropdowns, and textareas */
 input, select, textarea {
-    font-size: 15px !important; /* Ensure readable forms and selection fields */
+    font-size: 16px !important; /* Ensure readable forms and selection fields */
 }
 
 /* Base body adjustments */
