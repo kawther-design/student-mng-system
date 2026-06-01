@@ -11,6 +11,11 @@ if (!isset($_SESSION['user_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_user') {
     $collection = $database->getCollection('users');
     
+    $role = $_POST['role'];
+    if ($_SESSION['role'] === 'Vice President') {
+        $role = 'Teacher';
+    }
+    
     $userData = [
         'name' => $_POST['name'],
         'gender' => $_POST['gender'],
@@ -18,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'email' => $_POST['email'],
         'username' => $_POST['username'],
         'password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
-        'role' => $_POST['role'], // Teacher, Vice President, Admin
+        'role' => $role, // Teacher, Vice President, Admin
         'subject' => $_POST['subject'] ?? 'General',
         'status' => 'Active',
         'created_at' => new MongoDB\BSON\UTCDateTime()
@@ -34,12 +39,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $collection = $database->getCollection('users');
     $userId = new MongoDB\BSON\ObjectId($_POST['user_id']);
     
+    $role = $_POST['role'];
+    if ($_SESSION['role'] === 'Vice President') {
+        $role = 'Teacher';
+    }
+    
     $updateData = [
         'name' => $_POST['name'],
         'gender' => $_POST['gender'],
         'phone' => $_POST['phone'],
         'email' => $_POST['email'],
-        'role' => $_POST['role'],
+        'role' => $role,
         'subject' => $_POST['subject'] ?? 'General'
     ];
 
@@ -79,7 +89,11 @@ if (isset($_GET['delete_id'])) {
 
 // Fetch Users
 $collection = $database->getCollection('users');
-$users = $collection->find([], ['sort' => ['name' => 1]])->toArray();
+$filter = [];
+if ($_SESSION['role'] === 'Vice President') {
+    $filter['role'] = 'Teacher';
+}
+$users = $collection->find($filter, ['sort' => ['name' => 1]])->toArray();
 
 // Determine Dashboard URL and Accent Color based on role
 $dashboardUrl = 'admin-dashboard.php';
@@ -219,9 +233,11 @@ if (!empty($moduleBgClass)) {
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">System Role</label>
                         <select name="role" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer focus:ring-2 focus:ring-school-accent/5">
                             <option value="Teacher">Academic Teachers</option>
+                            <?php if ($_SESSION['role'] !== 'Vice President'): ?>
                             <option value="Vice President">Vice President</option>
                             <option value="Parent">Parent / Guardian</option>
                             <option value="Admin">Administrator</option>
+                            <?php endif; ?>
                         </select>
                     </div>
                     <div class="space-y-2">
@@ -301,9 +317,11 @@ if (!empty($moduleBgClass)) {
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">System Role</label>
                         <select name="role" id="edit-role" class="w-full bg-gray-50 border-none rounded-[1.5rem] py-5 px-8 outline-none text-sm font-bold text-school-accent cursor-pointer focus:ring-2 focus:ring-school-accent/5">
                             <option value="Teacher">Academic Teachers</option>
+                            <?php if ($_SESSION['role'] !== 'Vice President'): ?>
                             <option value="Vice President">Vice President</option>
                             <option value="Parent">Parent / Guardian</option>
                             <option value="Admin">Administrator</option>
+                            <?php endif; ?>
                         </select>
                     </div>
                 </div>
@@ -403,12 +421,16 @@ if (!empty($moduleBgClass)) {
                 
                 <div class="relative w-full md:w-64 group">
                     <i data-lucide="filter" class="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-school-accent transition-colors"></i>
-                    <select id="roleFilter" onchange="filterUsers()" class="w-full bg-white border border-gray-100 rounded-2xl py-4 pl-14 pr-10 outline-none text-sm font-bold text-school-accent appearance-none focus:ring-2 focus:ring-school-accent/5 shadow-sm transition-all cursor-pointer">
-                        <option value="">All Roles</option>
-                        <option value="Admin">Administrators</option>
-                        <option value="Teacher">Academic Teachers</option>
-                        <option value="Vice President">Vice President</option>
-                        <option value="Parent">Parents / Guardians</option>
+                    <select id="roleFilter" onchange="filterUsers()" class="w-full bg-white border border-gray-100 rounded-2xl py-4 pl-14 pr-10 outline-none text-sm font-black text-school-accent appearance-none focus:ring-2 focus:ring-school-accent/5 shadow-sm transition-all cursor-pointer">
+                        <?php if ($_SESSION['role'] !== 'Vice President'): ?>
+                        <option value="" class="font-bold text-school-accent">All Roles</option>
+                        <option value="Admin" class="font-bold text-school-accent">Administrators</option>
+                        <option value="Teacher" class="font-bold text-school-accent">Academic Teachers</option>
+                        <option value="Vice President" class="font-bold text-school-accent">Vice President</option>
+                        <option value="Parent" class="font-bold text-school-accent">Parents / Guardians</option>
+                        <?php else: ?>
+                        <option value="Teacher" class="font-bold text-school-accent">Academic Teachers</option>
+                        <?php endif; ?>
                     </select>
                     <i data-lucide="chevron-down" class="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none"></i>
                 </div>

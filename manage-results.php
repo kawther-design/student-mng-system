@@ -308,6 +308,11 @@ if ($_SESSION['role'] === 'Teacher') {
             
             <?php if ($exam): ?>
             <div class="flex items-center space-x-4">
+                <a href="export-results.php?exam_id=<?= $examId ?>&class=<?= urlencode($currentClass) ?>" class="bg-school-teal px-6 py-4 rounded-2xl flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white hover:scale-105 shadow-lg shadow-school-teal/20 transition-all">
+                    <i data-lucide="file-down" class="w-4 h-4"></i>
+                    <span class="hidden md:inline">Export Excel</span>
+                    <span class="md:hidden">Export</span>
+                </a>
                 <form method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
                     <input type="hidden" name="action" value="import_csv">
                     <label class="bg-school-accent px-6 py-4 rounded-2xl flex items-center space-x-3 text-[10px] font-black uppercase tracking-widest text-white cursor-pointer hover:scale-105 shadow-lg shadow-school-accent/20 transition-all">

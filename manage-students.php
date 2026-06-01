@@ -63,6 +63,67 @@ if (isset($_GET['delete_id'])) {
     exit;
 }
 
+// Handle Excel/CSV Import
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'import_students_csv') {
+    if (isset($_FILES['csv_file']) && $_FILES['csv_file']['error'] == 0) {
+        $file = $_FILES['csv_file']['tmp_name'];
+        $ext = pathinfo($_FILES['csv_file']['name'], PATHINFO_EXTENSION);
+        $rows = [];
+
+        if (strtolower($ext) === 'xlsx') {
+            if ($xlsx = Shuchkin\SimpleXLSX::parse($file)) {
+                $rows = $xlsx->rows();
+                array_shift($rows); // Skip header
+            }
+        } else {
+            $handle = fopen($file, "r");
+            fgetcsv($handle); // Skip header
+            while (($data = fgetcsv($handle)) !== FALSE) {
+                $rows[] = $data;
+            }
+            fclose($handle);
+        }
+
+        if (!empty($rows)) {
+            $count = 0;
+            $collection = $database->getCollection('students');
+            
+            $allStudents = $collection->find(['student_id' => ['$exists' => true]])->toArray();
+            $maxId = 1000;
+            foreach ($allStudents as $s) {
+                $idVal = (int)$s->student_id;
+                if ($idVal > $maxId && $idVal < 10000) {
+                    $maxId = $idVal;
+                }
+            }
+
+            foreach ($rows as $data) {
+                if (count($data) >= 1) { // Assuming row has data
+                    $maxId++;
+                    $sId = (string)$maxId;
+                    
+                    $studentData = [
+                        'student_id' => $sId,
+                        'name' => $data[0] ?? '',
+                        'student_phone' => $data[1] ?? '',
+                        'gender' => $data[2] ?? 'Male',
+                        'form' => $data[3] ?? 'Form 1',
+                        'neighborhood' => $data[4] ?? '',
+                        'parent_name' => $data[5] ?? '',
+                        'parent_phone' => $data[6] ?? '',
+                        'status' => 'Active',
+                        'created_at' => new MongoDB\BSON\UTCDateTime()
+                    ];
+                    $collection->insertOne($studentData);
+                    $count++;
+                }
+            }
+            header("Location: manage-students.php?msg=Imported $count students successfully");
+            exit;
+        }
+    }
+}
+
 // Fetch Students with filtering
 $collection = $database->getCollection('students');
 

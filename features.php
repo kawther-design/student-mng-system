@@ -52,37 +52,7 @@
                 </div>
             </div>
             
-            <div class="bg-school-blue p-20 rounded-[5rem] text-white relative overflow-hidden shadow-[0_50px_100px_-20px_rgba(45,62,139,0.3)]">
-                <div class="absolute -top-20 -right-20 w-96 h-96 bg-white/5 rounded-full blur-[100px]"></div>
-                <div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                    <div>
-                        <h2 class="text-5xl font-black tracking-tighter mb-8 uppercase leading-tight">State of the Art<br>Campus Facilities</h2>
-                        <p class="text-white/70 text-base font-medium leading-relaxed mb-12">
-                            Al Huda provides a modern learning environment equipped with high-speed internet, digital libraries, and advanced science labs.
-                        </p>
-                        <div class="flex flex-wrap gap-8">
-                            <div class="flex items-center space-x-4">
-                                <i data-lucide="wifi" class="text-school-teal w-6 h-6"></i>
-                                <span class="font-black text-xs uppercase tracking-widest">Fiber Connect</span>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <i data-lucide="monitor" class="text-school-coral w-6 h-6"></i>
-                                <span class="font-black text-xs uppercase tracking-widest">IT Labs</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-8">
-                        <div class="aspect-square bg-white/10 rounded-[3rem] p-10 flex flex-col justify-between hover:bg-white/20 transition-all cursor-default">
-                             <i data-lucide="book-open" class="w-8 h-8 text-school-teal"></i>
-                             <p class="font-black text-xs uppercase tracking-[0.2em]">Library</p>
-                        </div>
-                        <div class="aspect-square bg-white/10 rounded-[3rem] p-10 flex flex-col justify-between hover:bg-white/20 transition-all cursor-default">
-                             <i data-lucide="coffee" class="w-8 h-8 text-school-coral"></i>
-                             <p class="font-black text-xs uppercase tracking-[0.2em]">Cafeteria</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </section>
 
